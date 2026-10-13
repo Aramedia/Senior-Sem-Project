@@ -2,7 +2,7 @@
 import sqlite3
 from flask import g
 
-DATABASE = '/profile_database.sqbpro' # route to database file
+DATABASE = '/database.sqbpro' # route to database file
 #sqlite3 link instead 
 
 def get_db(): # function to get database connection
