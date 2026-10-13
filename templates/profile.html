@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dietary Profile - SafePlate</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9f5;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .profile-container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #315c3b;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        .restriction {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f3f6f1;
+            border-radius: 8px;
+        }
+
+        label {
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #315c3b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #24462c;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #315c3b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="profile-container">
+
+    <h1>Build Your Dietary Profile</h1>
+
+    <p>Select your dietary restrictions and preferences.</p>
+
+    <form method="POST" action="{{ url_for('profile') }}">
+
+        {% for restriction in restrictions_list %}
+
+        <div class="restriction">
+            <label>
+                <input
+                    type="checkbox"
+                    name="restrictions"
+                    value="{{ restriction }}"
+                    {% if restriction in selected_restrictions %}checked{% endif %}
+                >
+                {{ restriction }}
+            </label>
+        </div>
+
+        {% endfor %}
+
+        <button type="submit">Save My Dietary Profile</button>
+
+    </form>
+
+    <a href="{{ url_for('home') }}" class="back-link">
+        Back to Home
+    </a>
+
+</div>
+
+</body>
+</html>
