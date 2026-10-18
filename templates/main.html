@@ -42,12 +42,16 @@
     </div>
 
     <div class="filter-tags">
-        <button class="tag active">🌿 Gluten-Free</button>
-        <button class="tag active">🥛 Dairy-Free</button>
-        <button class="tag">🌱 Vegan</button>
-        <button class="tag">🧂 Low-Sodium</button>
-        <button class="tag">🥜 Nut-Free</button>
-        <button class="tag">🫘 Soy-Free</button>
+        <button type="button" class="diet-chip active">🌿 All </button>
+        <button type="button" class="diet-chip"> 🍚Gluten-Free</button>
+        <button type="button" class="diet-chip"> 🥛Dairy-free</button>
+        <button type="button" class="diet-chip"> 🥬Vegan</button>
+        <button type="button" class="diet-chip"> 🥗Vegetarian</button>
+        <button type="button" class="diet-chip"> 🌰Nut-Free</button>
+        <button type="button" class="diet-chip"> 🌽Soy-Free</button>
+        <button type="button" class="diet-chip"> 🧆Halal</button>
+        <button type="button" class="diet-chip"> 🥯Kosher</button>
+        <button type="button" class="diet-chip"> 🧂Low-Sodium</button>
     </div>
 
     <div class="recipe-card-preview">
@@ -110,62 +114,68 @@
         </div>
     </div>
 </section>
+
 <!-- 4. Recipes Section -->
-<section class="recipes-section">
+<section id="recipes-section" class="recipes-section">
     <div class="section-header">
         <span class="sub-caption">APPETIZING INSPIRATION</span>
         <h2 class="section-title">Recipes designed to delight, verified to protect</h2>
-        <p class="section-subtitle">Your kitchen should be a place of culinary discovery, not stress.</p>
+        <p class="section-subtitle">
+            Your kitchen should be a place of culinary discovery, not stress.</p>
+        <div class="header-action" style="margin-top: 16px; text-align: center;">
+            <a href="{{ url_for('search_recipes') }}" class="btn-primary">
+                See All Recipes &rarr;
+            </a>
+        </div>
     </div>
 
-    <div class="recipes-grid">
-        <div class="recipe-card">
-            <img src="https://via.placeholder.com/350x200" alt="Avocado Pesto Zucchini Noodles" class="recipe-card-img">
-            <div class="recipe-card-content">
-                <div class="recipe-tags">
-                    <span>VEGAN</span>
-                    <span>GLUTEN-FREE</span>
-                    <span>NUT-FREE</span>
+
+    <!-- Carousel for recipes -->
+    <div class="carousel-wrapper">
+
+        <button class="carousel-arrow" id="prevBtn">&#10094;</button>
+
+        <div class="carousel-track-container" id="carouselTrack">
+            <div class="recipes-grid">
+                {% if recipes %}
+                {% for meal in recipes %}
+                <div class="recipe-card">
+                    <div class="recipe-card-image-wrapper">
+                        <img src="{{ meal.image }}" alt="{{ meal.name }}" class="recipe-card-image">
+                        <span class="badge-tag verified">100% Verified</span>
+                    </div>
+
+                    <div class="recipe-card-content">
+                        <div class="recipe-tags-group">
+                            <span class="badge-tag area-tag">{{ meal.area if meal.area else 'International' }}</span>
+                            <span class="badge-tag category-tag">{{ meal.category }}</span>
+                        </div>
+
+                        <h3 class="recipe-title">{{ meal.name }}</h3>
+
+                        <div class="recipe-meta">
+                            <span class="meta-item">⏲️ {{ meal.cooktime }}</span>
+                            <span class="meta-divider">.</span>
+                            <span class="meta-item">🥗 {{ meal.prep_label }}</span>
+                        </div>
+
+                    </div>
                 </div>
-                <h3 class="recipe-card-title">Avocado Pesto Zucchini Noodles</h3>
-                <div class="recipe-card-footer">
-                    <span class="cook-time">Cook Time: 15 Mins</span>
-                    <a href="#" class="view-recipe">View Recipe</a>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Add "See All Recipes" card in the end -->
+                <div class="recipe-card see-all-card">
+                    <div class="see-all-content">
+                        <h3>Ready for More?</h3>
+                        <p>Explore our full collection of safe & verified recipes.</p>
+                        <a href="/recipes" class="btn-primary">See All Recipes &rarr;</a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="recipe-card">
-            <img src="https://via.placeholder.com/350x200" alt="Low-Sodium Citrus Herbed Chicken"
-                class="recipe-card-img">
-            <div class="recipe-card-content">
-                <div class="recipe-tags">
-                    <span>DAIRY-FREE</span>
-                    <span>LOW-SODIUM</span>
-                </div>
-                <h3 class="recipe-card-title">Low-Sodium Citrus Herbed Chicken</h3>
-                <div class="recipe-card-footer">
-                    <span class="cook-time">Cook Time: 30 Mins</span>
-                    <a href="#" class="view-recipe">View Recipe</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="recipe-card">
-            <img src="https://via.placeholder.com/350x200" alt="Coconut Chia Berry Parfait" class="recipe-card-img">
-            <div class="recipe-card-content">
-                <div class="recipe-tags">
-                    <span>DAIRY-FREE</span>
-                    <span>VEGAN</span>
-                    <span>GLUTEN-FREE</span>
-                </div>
-                <h3 class="recipe-card-title">Coconut Chia Berry Parfait</h3>
-                <div class="recipe-card-footer">
-                    <span class="cook-time">Cook Time: 10 Mins</span>
-                    <a href="#" class="view-recipe">View Recipe</a>
-                </div>
-            </div>
-        </div>
+        <button class="carousel-arrow" id="nextBtn">&#10095;</button>
     </div>
 </section>
 
@@ -229,7 +239,7 @@
                         <h3 class="restaurant-name">Wildflower Greens Cafe</h3>
                         <span class="rating-badge green">EXCELLENT (9.8/10)</span>
                     </div>
-                    <p class="restaurant-meta">Modern Bistro & Bowls • 1.2 miles away — 420 Oak St</p>
+                    <p class="restaurant-meta">Modern Bistro & Bowls - 1.2 miles away - 420 Oak St</p>
                     <p class="restaurant-feature">✓ Dedicated Gluten-Free prep area</p>
                 </div>
             </div>
@@ -241,7 +251,7 @@
                         <h3 class="restaurant-name">Rooted Kitchen</h3>
                         <span class="rating-badge orange">CERTIFIED SAFE (10/10)</span>
                     </div>
-                    <p class="restaurant-meta">100% Plant-Based Eatery • 2.5 miles away — 188 Pine Ave</p>
+                    <p class="restaurant-meta">100% Plant-Based Eatery - 2.5 miles away - 188 Pine Ave</p>
                     <p class="restaurant-feature">✓ Entirely dairy-free & animal-free kitchen</p>
                 </div>
             </div>

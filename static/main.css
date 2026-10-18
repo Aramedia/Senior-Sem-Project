@@ -1,15 +1,20 @@
-/* 1. Reset & Global Variables */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+/* 1. Reset & Global Variables  */
 :root {
     --bg-cream: #FCFAF6;
-    /* light background */
+    /* Light background */
     --bg-sage-light: #F2F5F3;
-    /* gray background */
+    /* Gray/Sage background */
     --bg-dark-green: #384A42;
     /* Green background (CTA) */
     --bg-footer: #2D3A34;
-    /* footer background */
+    /* Footer background */
     --primary-orange: #E56B42;
-    /* Orange */
+    /* Primary brand orange */
     --text-dark: #1A202C;
     --text-muted: #718096;
 }
@@ -25,6 +30,8 @@ body {
     background-color: var(--bg-cream);
     color: var(--text-dark);
     line-height: 1.5;
+    padding-top: 90px;
+    /* Push the page under the NAVBAR to help it isn't under the NAVBAR*/
 }
 
 /* 2. Typography Helpers */
@@ -42,6 +49,18 @@ body {
     margin-bottom: 32px;
 }
 
+/* For the See all Recipes button*/
+.header-action {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Push Carousel get away from header */
+.recipes-section .section-header {
+    margin-bottom: 25px;
+}
+
 .section-title {
     font-family: Georgia, serif;
     font-size: 32px;
@@ -55,14 +74,21 @@ body {
     font-size: 14px;
 }
 
-/* 3. Header Navbar & Hero Section (Nền Kem Sáng) */
+/* 3. Navbar & Hero Section  */
 .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 20px 80px;
     max-width: 1440px;
-    margin: 0 auto;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--bg-cream);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
@@ -85,9 +111,126 @@ body {
     font-size: 12px;
 }
 
+/* Styling Dropdown Container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    text-decoration: none;
+    color: #4A5568;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.arrow-down {
+    font-size: 30px;
+    margin-left: 5px;
+    /*Make a distance between word and arrow*/
+    display: inline-block;
+    /*Ensure the rotate effect functions smoothly*/
+    transition: transform 0.2s ease;
+}
+
+/*  Menu appear*/
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #FFFFFF;
+    min-width: 250px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    padding: 12px 0;
+    z-index: 1001;
+    border: 1px solid #EDF2F7;
+}
+
+/* Open menu when hover */
+.dropdown:hover .dropdown-menu {
+    display: block;
+    animation: dropdownFadeIn 0.2s ease-in-out;
+}
+
+.dropdown:hover .arrow-down {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 8px 18px;
+    color: #2D3748;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-menu a:hover {
+    background-color: #FFF5F2;
+    color: var(--primary-orange);
+}
+
+.dropdown-header {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary-orange);
+    letter-spacing: 0.05em;
+    padding: 6px 18px 2px;
+    text-transform: uppercase;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #EDF2F7;
+    margin: 6px 0;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Làm cho đường dẫn mở trang Recipes nổi bật hơn các dòng khác */
+.dropdown-item-highlight {
+    font-weight: 700 !important;
+    color: var(--primary-orange) !important;
+    background-color: #FFF5F2;
+    border-radius: 6px;
+    margin: 2px 8px;
+}
+
+.dropdown-item-highlight:hover {
+    background-color: var(--primary-orange) !important;
+    color: #FFFFFF !important;
+}
+
 .nav-links {
     display: flex;
-    gap: 24px;
+    align-items: center;
+    gap: 0;
+}
+
+.nav-links>*:not(:last-child) {
+    border-right: 2px solid #616161;
+    padding-right: 16px;
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    height: 40px;
 }
 
 .nav-links a {
@@ -205,7 +348,9 @@ body {
     object-fit: cover;
 }
 
-/* 4. Custom Profile Setup Section (Nền Xanh Xám Nhạt) */
+/* 
+   4. Custom Profile Setup Section 
+    */
 .profile-setup-section {
     background-color: var(--bg-sage-light);
     padding: 80px 20px;
@@ -267,12 +412,50 @@ body {
 }
 
 .badge {
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
     background: #F7FAFC;
     padding: 3px 6px;
     border-radius: 4px;
+}
+
+/* Change color  for cook_label */
+.badge-cook-quick {
+    background-color: #EBF8FF;
+    color: #2B6CB0;
+    border: 1px solid #BEE3F8;
+}
+
+.badge-cook-standard {
+    background-color: #FEFCBF;
+    color: #975A16;
+    border: 1px solid #FAF089;
+}
+
+.badge-cook-longer {
+    background-color: #EBF4FF;
+    color: #4C51BF;
+    border: 1px solid #C3DAFE;
+}
+
+/* Change color for prep_label */
+.badge-prep-easy {
+    background-color: #F0FDF4;
+    color: #166534;
+    border: 1px solid #BBF7D0;
+}
+
+.badge-prep-standard {
+    background-color: #FFFAF0;
+    color: #DD6B20;
+    border: 1px solid #FBD38D;
+}
+
+.badge-prep-hard {
+    background-color: #FFF5F5;
+    color: #C53030;
+    border: 1px solid #FEB2B2;
 }
 
 .recipe-title {
@@ -298,7 +481,7 @@ body {
     white-space: nowrap;
 }
 
-/* 5. The SafePlate System Section (Nền Kem Sáng) */
+/* 5. SafePlate System Section */
 .system-section {
     background-color: var(--bg-cream);
     padding: 80px 20px;
@@ -358,7 +541,7 @@ body {
     line-height: 1.6;
 }
 
-/* 6. Recipes Section (Nền Kem Sáng) */
+/* 6. Recipes Carousel Section*/
 .recipes-section {
     background-color: var(--bg-cream);
     padding: 80px 20px;
@@ -366,18 +549,36 @@ body {
     margin: 0 auto;
 }
 
+.carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+}
+
+/* roll bar */
+.carousel-track-container {
+    width: 100%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
 .recipes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 24px;
-    margin-top: 36px;
+    padding: 10px 4px;
+    width: max-content;
 }
 
 .recipe-card {
-    background: #FFFFFF;
+    flex: 0 0 320px;
+    box-sizing: border-box;
+    background: #ffffff;
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #EDF2F7;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .recipe-card-img {
@@ -386,51 +587,348 @@ body {
     object-fit: cover;
 }
 
+.recipe-card-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    overflow: hidden;
+}
+
+.recipe-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.badge-tag.verified {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #137333;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+}
+
+.recipe-sub-caption {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+
 .recipe-card-content {
     padding: 20px;
 }
 
-.recipe-tags {
+/*  2 Badge Country and type of dish */
+.recipe-tags-group {
     display: flex;
     gap: 6px;
+    margin-bottom: 8px;
     flex-wrap: wrap;
-    margin-bottom: 10px;
 }
 
-.recipe-tags span {
-    font-size: 9px;
+/* Badge Country has Blue background */
+.badge-tag.area-tag {
+    background-color: #EBF8FF;
+    color: #2B6CB0;
+    border: 1px solid #BEE3F8;
+    font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
-    background: #F7FAFC;
-    padding: 3px 6px;
-    border-radius: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
 }
 
-.recipe-card-title {
-    font-size: 16px;
-    color: var(--text-dark);
+/* Badge Type of dish has Pink background */
+.badge-tag.category-tag {
+    background-color: #FFF5F5;
+    color: #C53030;
+    border: 1px solid #e5b5d9;
+    font-size: 11px;
     font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+/* Meta center */
+.recipe-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4A5568;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+    /* Not long */
 }
 
-.recipe-card-footer {
+.meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+.meta-divider {
+    color: #A0AEC0;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 2 button arrows */
+.carousel-arrow {
+    background-color: var(--primary-orange, #E56B42);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-arrow:hover {
+    background-color: #d4532d;
+}
+
+/* Recipes Search Hero */
+.recipes-search-hero {
+    background-color: var(--bg-sage-light);
+    padding: 60px 20px 40px;
+    text-align: center;
+}
+
+.search-bar-container {
+    max-width: 720px;
+    margin: 28px auto 0;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 6px 8px 6px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-orange);
+}
+
+.search-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: var(--text-muted);
+}
+
+.search-input-wrapper input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+/* Quick Diet Filters */
+.quick-diet-filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.diet-chip {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.diet-chip.active,
+.diet-chip:hover {
+    background: var(--bg-dark-green);
+    color: #FFFFFF;
+    border-color: var(--bg-dark-green);
+}
+
+/* Results Section Layout */
+.recipes-results-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.results-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #E2E8F0;
 }
 
-.cook-time {
-    color: #A0AEC0;
+.recipes-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
 }
 
-.view-recipe {
-    color: var(--primary-orange);
-    text-decoration: none;
+.recipe-card-detailed {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #EDF2F7;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recipe-card-detailed:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.card-img-wrapper {
+    position: relative;
+    height: 190px;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.area-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #FFF;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
     font-weight: 600;
 }
 
-/* 7. Grocery Section (Nền Xanh Xám Nhạt) */
+.card-body {
+    padding: 20px;
+}
+
+.safety-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.badge-tag.safe {
+    background: #E6F4EA;
+    color: #137333;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.badge-tag.category {
+    background: #FEF7E0;
+    color: #B06000;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.recipe-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.recipe-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #555555;
+    margin-bottom: 14px;
+    font-weight: 500;
+}
+
+.btn-view-recipe {
+    display: block;
+    text-align: center;
+    background: var(--bg-sage-light);
+    color: var(--bg-dark-green);
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.btn-view-recipe:hover {
+    background: var(--primary-orange);
+    color: #FFFFFF;
+}
+
+/* No Results Box */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-results-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+/* For Flag */
+.flags-grid a {
+    font-size: 26px;
+    text-decoration: none;
+    padding: 6px 10px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.flags-grid a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-orange);
+}
+
+/* 7. Grocery Section */
 .grocery-section {
     background-color: var(--bg-sage-light);
     padding: 80px 20px;
@@ -492,7 +990,7 @@ body {
     border-radius: 4px;
 }
 
-/* 8. Restaurant Section (Nền Xanh Xám Nhạt) */
+/*  8. Restaurant Section */
 .restaurant-section {
     background-color: var(--bg-sage-light);
     padding: 80px 20px;
@@ -615,7 +1113,9 @@ body {
     left: 60%;
 }
 
-/* 9. Promise Section (Nền Kem Sáng) */
+/* 
+   9. Promise Section 
+    */
 .promise-section {
     background-color: var(--bg-cream);
     padding: 80px 20px;
@@ -670,7 +1170,9 @@ body {
     object-fit: cover;
 }
 
-/* 10. Testimonials Section (Nền Xanh Xám Nhạt) */
+/* 
+   10. Testimonials Section 
+    */
 .testimonials-section {
     background-color: var(--bg-sage-light);
     padding: 80px 20px;
@@ -724,7 +1226,9 @@ body {
     color: #A0AEC0;
 }
 
-/* 11. FAQ Section (Nền Kem Sáng) */
+/* 
+   11. FAQ Section 
+    */
 .faq-section {
     background-color: var(--bg-cream);
     padding: 80px 20px;
@@ -778,7 +1282,9 @@ details[open] .faq-arrow {
     margin-top: 12px;
 }
 
-/* 12. CTA Banner Section (Nền Xanh Lục Đậm) */
+/* 
+   12. CTA Banner Section 
+    */
 .cta-banner {
     background-color: var(--bg-dark-green);
     color: #FFFFFF;
@@ -821,7 +1327,9 @@ details[open] .faq-arrow {
     font-weight: 500;
 }
 
-/* 13. Footer Section (Nền Xanh Lục Tối) */
+/* 
+   13. Footer Section 
+    */
 .footer {
     background-color: var(--bg-footer);
     color: #A0AEC0;
@@ -908,34 +1416,34 @@ details[open] .faq-arrow {
     color: #A0AEC0;
 }
 
-/* 14. Back to Top*/
+/* 14. Back to Top Button */
 #backToTopBtn {
     display: none;
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 99;
+    z-index: 99999 !important;
+
     border: none;
     outline: none;
-    background-color: var(--primary-orange, #E56B42);
-    /* Dùng màu cam cùng tông giao diện */
+    background-color: var(--primary-orange);
     color: white;
     cursor: pointer;
-    padding: 12px 16px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    transition: opacity 0.3s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 #backToTopBtn:hover {
     background-color: #2D3A34;
-    /* Change color when hovering */
     transform: translateY(-3px);
 }
 
-/* 15. Auth Forms (Login, Register, Forgot Password) */
+/*  15. Auth Forms (Login, Register, Forgot Password)  */
 .auth-container {
     max-width: 420px;
     margin: 60px auto;
@@ -982,19 +1490,18 @@ details[open] .faq-arrow {
     font-size: 0.95rem;
     color: #2D3748;
     outline: none;
-    box-sizing: border-radius;
     box-sizing: border-box;
     transition: border-color 0.2s;
 }
 
 .form-input:focus {
-    border-color: var(--primary-orange, #E56842);
+    border-color: var(--primary-orange);
 }
 
 .auth-btn {
     width: 100%;
     padding: 12px;
-    background-color: var(--primary-orange, #E56842);
+    background-color: var(--primary-orange);
     color: white;
     border: none;
     border-radius: 8px;
@@ -1008,10 +1515,468 @@ details[open] .faq-arrow {
     background-color: #d4532d;
 }
 
-.auth-desc {
-    color: #718096;
-    font-size: 0.95rem;
-    text-align: center;
+/* 16.Recipes Search Hero */
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 6px 8px 6px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-orange);
+}
+
+.search-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: var(--text-muted);
+}
+
+.search-input-wrapper input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+/* Quick Diet Filters */
+.quick-diet-filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.diet-chip {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.diet-chip.active,
+.diet-chip:hover {
+    background: var(--bg-dark-green);
+    color: #FFFFFF;
+    border-color: var(--bg-dark-green);
+}
+
+/* Results Section Layout */
+.recipes-results-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.results-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 24px;
-    line-height: 1.5;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.recipes-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+}
+
+.card-img-wrapper {
+    position: relative;
+    height: 190px;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.area-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #FFF;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.safety-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.badge-tag.safe {
+    background: #E6F4EA;
+    color: #137333;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.badge-tag.category {
+    background: #FEF7E0;
+    color: #B06000;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.recipe-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+/* The normal button with fade orange */
+.btn-view-recipe,
+.btn-view-recipe:visited {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    background-color: #ff9d7c;
+    /* Light orange background*/
+    color: #FFFFFF;
+    /* The white color font */
+    border: 1px solid #ff7d56;
+    /* orange border */
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    box-sizing: border-box;
+    /* Sure width 100% keep the border inside */
+    transition: all 0.25s ease-in-out;
+    /* Smooth transition for all properties */
+}
+
+/* Hove, when the user clicks change to orange, white font */
+.btn-view-recipe:hover {
+    background-color: #E85A2A;
+    /* Orange background */
+    color: #FFFFFF;
+    /* White text for contrast */
+    border-color: #E85A2A;
+    box-shadow: 0 4px 12px rgba(232, 90, 42, 0.25);
+    /* Subtle shadow for elevation */
+    transform: translateY(-2px);
+    /* Slight lift on hover */
+}
+
+/* Active */
+.btn-view-recipe:active {
+    background-color: #D0481B;
+    /* A slightly deeper orange.*/
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* No Results Box */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-results-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+/* 17. Back to previous page button */
+button.btn-back {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.back-navigation {
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+    text-align: left;
+}
+
+/* Organge button */
+button.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--primary-orange);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(229, 107, 66, 0.25);
+    transition: all 0.25s ease;
+}
+
+/* Hover effect */
+button.btn-back:hover {
+    background-color: #D05932;
+    /* A slightly deeper orange.*/
+    transform: translateY(-2px);
+    /* Rise slightly to the surface */
+    box-shadow: 0 4px 12px rgba(229, 107, 66, 0.35);
+}
+
+/* Active effect */
+button.btn-back:active {
+    transform: translateY(0);
+}
+
+/* 18. Card See All Recipes & Arrow Hide (Carousel) */
+.recipe-card.see-all-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #FFF5F2 0%, #F2F5F3 100%);
+    border: 2px dashed var(--primary-orange);
+}
+
+.see-all-content {
+    padding: 24px;
+}
+
+.see-all-content h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.see-all-content p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/*  Hide carousel arrows when scrolling to the start or end. */
+.carousel-arrow {
+    background-color: var(--primary-orange, #E56B42);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    /* Add transition for smooth fade in/out arrow */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.carousel-arrow.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* 19. Recipe Details Page Styles */
+.recipe-detail-container {
+    max-width: 1080px;
+    margin: 0 auto 60px auto;
+    padding: 0 20px;
+}
+
+/* Go Back Button */
+.recipe-back {
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-back {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background: #F7FAFC;
+    transform: translateX(-3px);
+}
+
+.recipe-detail-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.recipe-detail-header h1 {
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 8px 0 12px 0;
+}
+
+/* Align the Badges group below the heading */
+.center-tags {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.recipe-detail-body {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    /* Align the two columns so they are even from the top down. */
+    margin-bottom: 40px;
+}
+
+.recipe-img-wrapper {
+    flex: 0 0 420px;
+    max-width: 100%;
+    width: 100%;
+}
+
+.recipe-detail-img {
+    width: 100%;
+    height: 100%;
+    max-height: 400px;
+    min-height: 300px;
+    border-radius: 16px;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Ingredients List */
+.recipe-ingredients-box {
+    flex: 1;
+    min-width: 280px;
+    background: #FFFFFF;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #EDF2F7;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.recipe-ingredients-box h3,
+.recipe-instructions-box h3 {
+    margin-bottom: 16px;
+    color: var(--text-dark);
+    font-size: 20px;
+}
+
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ing-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #E2E8F0;
+}
+
+.ing-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.ing-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    flex: 1;
+}
+
+.ing-measure {
+    color: #718096;
+    font-size: 14px;
+    background: #F7FAFC;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Step-by-step Instructions */
+.recipe-instructions-box {
+    background: #FFFFFF;
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid #EDF2F7;
+}
+
+.instructions-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.step-card {
+    background: #F8FAFC;
+    border-left: 4px solid var(--primary-orange);
+    padding: 16px 20px;
+    border-radius: 0 12px 12px 0;
+}
+
+.step-number {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--primary-orange);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.step-text {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text-dark);
+    font-size: 15px;
 }

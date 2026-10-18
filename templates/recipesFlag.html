@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Flag Recipes - SafePlate{% endblock %}
+
+{% block content %}
+<div class="recipes-search-hero" style="padding-top: 40px; text-align: center;">
+    <div class="back-navigation">
+        <button class="btn-back" onclick="window.history.back()">
+            ⬅ Go Back
+        </button>
+    </div>
+
+    <h1 class="hero-title" style="margin-top: 15px;"> 🌎 Explore Recipes by Country</h1>
+    <p class="hero-description">Select a country flag to view its signature safe recipes.</p>
+
+    <!-- Dropdown choose the country -->
+    <div style="max-width: 400px; margin: 20px auto;">
+        <form method="GET" action="{{ url_for('recipes_by_flag') }}">
+            <select name="area" onchange="this.form.submit()"
+                style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 2px solid #E2E8F0; font-size: 16px; font-weight: 600; cursor: pointer; background-color: #FFFFFF;">
+                {% for key, info in countries.items() %}
+                <option value="{{ key }}" {% if key==selected_area %}selected{% endif %}>
+                    {{ info.flag }} {{ info.name }} Cuisine
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Appear the meals -->
+<section class="recipes-results-section">
+    <div class="results-info">
+        <h2>Showing {{ countries[selected_area].flag }} {{ selected_area }} Recipes</h2>
+        <span>Found {{ meals|length }} items</span>
+    </div>
+
+    <div class="recipes-grid-layout">
+        {% for meal in meals %}
+        <div class="recipe-card-detailed">
+            <!-- Oicture and Badge of country  -->
+            <div class="card-img-wrapper">
+                <img src="{{ meal.strMealThumb }}" alt="{{ meal.strMeal }}">
+                <span class="area-badge">{{ meal.strArea if meal.strArea else selected_area }}</span>
+            </div>
+
+            <!-- Information for card -->
+            <div class="card-body">
+                <!-- 1) Type of Badges-->
+                <div class="safety-tags">
+                    <span class="badge-tag safe">100% Verified</span>
+                    {% if meal.strCategory %}
+                    <span class="badge-tag category">{{ meal.strCategory }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- 2) Name os meals -->
+                <h3 class="recipe-name">{{ meal.strMeal }}</h3>
+
+                <!-- 3. Information of time and prepare -->
+                <div class="recipe-meta">
+                    {% if meal.cook_label %}
+                    <span class="meta-item">⏲️ {{ meal.cook_label }}</span>
+                    <span class="meta-divider">•</span>
+                    {% endif %}
+                    {% if meal.prep_label %}
+                    <span class="meta-item">🥗 {{ meal.prep_label }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- 4. Button View Details -->
+                <a href="{{ url_for('recipe_detail', meal_id=meal.idMeal) }}" class="btn-view-recipe">
+                    View Recipe & Allergen Details &rarr;</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-results">
+            <p>No recipes found for this country.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
