@@ -63,6 +63,8 @@
         <div class="auth-buttons">
             {% if current_user.is_authenticated %}
             <span>Hello, {{ current_user.email }}</span>
+
+            <a href-"{{ url_for('profile') }}" class="btn-primary-small"> My Profile</a>
             <a href="/logout" class="btn-primary-small">Logout</a>
             {% else %}
             <a href="/login" class="btn-primary-small">Sign In</a>

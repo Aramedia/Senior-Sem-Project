@@ -14,10 +14,10 @@
             your profile, instantly discover safe recipes, grocery brands, and local restaurants—certified safe for
             you.
         </p>
-        <div class="hero-actions">
-            <a href="#" class="btn-primary">Build Your Free Profile &rarr;</a>
-            <a href="#" class="btn-secondary">See How We Verify</a>
-        </div>
+    <div class="hero-actions">
+        <a href="{{ url_for('profile') }}" class="btn-primary">Build Your Free Profile &rarr;</a>
+        <a href="#" class="btn-secondary">See How We Verify</a>
+    </div>
         <div class="social-proof">
             <div class="avatar-group">
                 <img src="https://via.placeholder.com/32" alt="Dietitian 1">
@@ -379,7 +379,7 @@
         <p class="cta-subtitle">Build your custom safe dietary profile today and unlock hundreds of dietitian-vetted
             recipes, grocery lists, and safe local tables.</p>
         <div class="cta-buttons">
-            <a href="#" class="btn-primary">Build Free Profile &rarr;</a>
+            <a href="{{ url_for('profile') }}" class="btn-primary">Build Free Profile &rarr;</a>
             <a href="#" class="btn-outline">Speak to a Wellness Specialist</a>
         </div>
     </div>
@@ -403,7 +403,7 @@
             <div class="footer-col">
                 <h4 class="footer-col-title">PRODUCT</h4>
                 <ul>
-                    <li><a href="#">Profile Builder</a></li>
+                    <li><a href="{{ url_for('profile') }}">Profile Builder</a></li>
                     <li><a href="#">Recipe Engine</a></li>
                     <li><a href="#">Grocery Scanner</a></li>
                     <li><a href="#">Map Finder</a></li>
