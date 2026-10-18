@@ -22,7 +22,40 @@
         </div>
         <nav class="nav-links">
             <a href="/#how-it-works">How it Works</a>
-            <a href="/#recipes">Recipes & Brands</a>
+            <!-- The list for Recipes and Brand -->
+            <div class="dropdown">
+                <a href="/#recipes-section" class="dropdown-toggle">
+                    Recipes & Brands <span class="arrow-down">▾</span>
+                </a>
+                <div class="dropdown-menu">
+                    <div class="dropdown-header">QUICK ACCESS</div>
+                    <a href="{{ url_for('search_recipes') }}" class="dropdown-item-highlight">
+                        📚 Open Recipes Page &rarr;
+                    </a>
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Group 1: Ingredient Preparation Scale -->
+                    <div class="dropdown-header">🥗 INGREDIENT PREPARE SCALE</div>
+                    <a href="{{ url_for('search_recipes') }}?prep=minimal">🥗 Minimal Ingredients (&lt; 6)</a>
+                    <a href="{{ url_for('search_recipes') }}?prep=standard">🥗 Standard Prep (6 - 11)</a>
+                    <a href="{{ url_for('search_recipes') }}?prep=complex">🥗 Complex Prep (&gt; 11)</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Group 2: Recipe Length & Difficulty -->
+                    <div class="dropdown-header">⏱️ RECIPE LENGTH & DIFFICULTY</div>
+                    <a href="{{ url_for('search_recipes') }}?type=quick">🚀 Quick and Easy</a>
+                    <a href="{{ url_for('search_recipes') }}?type=standard">🍳 Standard Recipe</a>
+                    <a href="{{ url_for('search_recipes') }}?type=detailed">🍲 Detailed Recipe</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Group 3: All of brands  -->
+                    <div class="dropdown-header"> EXPLORE ALL</div>
+                    <a href="{{ url_for('search_recipes') }}">📖 All Verified Recipes</a>
+                    <a href="/#grocery-section">📦 Safe Supermarket Brands</a>
+                </div>
+            </div>
             <a href="/#restaurants">Restaurant Finder</a>
             <a href="/#safety">Our Safety Standard</a>
             <a href="/#faq">FAQ</a>
@@ -45,6 +78,8 @@
         {% endblock %}
     </main>
 
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" title="Go to top">↑</button>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
