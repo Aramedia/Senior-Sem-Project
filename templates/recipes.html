@@ -18,63 +18,133 @@
     </div>
 
     <!-- Main search bar -->
-    <form action="/recipes" method="POST" class="search-bar-container">
+    <form action="{{ url_for('search_recipes') }}" method="GET" class="search-bar-container">
         <div class="search-input-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" name="keyword" placeholder="Enter recipe name or ingredient (e.g., Chicken, Salad...)"
-                value="{{ request.form.get('keyword', '') }}" required>
+                value="{{ request.args.get('keyword', '') }}">
             <button type="submit" class="btn-primary">Search</button>
         </div>
 
         <!-- Dietary Filters -->
         <div class="quick-diet-filters">
             <span class="filter-label">Quick Filter:</span>
-            <button type="button" class="diet-chip active">🌿 All </button>
-            <button type="button" class="diet-chip"> 🍚Gluten-Free</button>
-            <button type="button" class="diet-chip"> 🥛Dairy-free</button>
-            <button type="button" class="diet-chip"> 🥬Vegan</button>
-            <button type="button" class="diet-chip"> 🥗Vegetarian</button>
-            <button type="button" class="diet-chip"> 🌰Nut-Free</button>
-            <button type="button" class="diet-chip"> 🌽Soy-Free</button>
-            <button type="button" class="diet-chip"> 🧆Halal</button>
-            <button type="button" class="diet-chip"> 🥯Kosher</button>
-            <button type="button" class="diet-chip"> 🧂Low-Sodium</button>
+
+            <a href="{{ url_for('search_recipes') }}"
+                class="diet-chip {% if not selected_diet or selected_diet == 'all' %}active{% endif %}">
+                🌿 All
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Gluten-Free', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Gluten-Free' %}active{% endif %}">
+                🍚 Gluten-Free
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Dairy-Free', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Dairy-Free' %}active{% endif %}">
+                🥛 Dairy-free
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Vegan', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Vegan' %}active{% endif %}">
+                🥬 Vegan
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Vegetarian', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Vegetarian' %}active{% endif %}">
+                🥗 Vegetarian
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Nut-Free', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Nut-Free' %}active{% endif %}">
+                🌰 Nut-Free
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Soy-Free', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Soy-Free' %}active{% endif %}">
+                Soy-Free
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Halal', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Halal' %}active{% endif %}">
+                🧆 Halal
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Kosher', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Kosher' %}active{% endif %}">
+                🥯 Kosher
+            </a>
+
+            <a href="{{ url_for('search_recipes', diet='Low-Sodium', keyword=request.args.get('keyword', '')) }}"
+                class="diet-chip {% if selected_diet == 'Low-Sodium' %}active{% endif %}">
+                🧂 Low-Sodium
+            </a>
         </div>
     </form>
 </section>
 
 <!-- Result list -->
 <section class="recipes-results-section">
-    {% if meals is not none %}
     <div class="results-info">
-        <h2>Search Results {% if request.form.get('keyword') %}for "<strong>{{ request.form.get('keyword')
-                }}</strong>"{% endif %}</h2>
-        <span class="results-count">Found {{ meals|length }} recipes</span>
+        <h2>
+            Search Results
+            {% if request.args.get('keyword') %}
+            for "<strong>{{ request.args.get('keyword') }}</strong>"
+            {% elif selected_diet and selected_diet != 'all' %}
+            for <strong>{{ selected_diet }}</strong>
+            {% endif %}
+        </h2>
+        <span class="results-count">Found <strong id="displayed-count">{{ meals|length }}</strong> items</span>
     </div>
 
     {% if meals %}
-    <div class="recipes-grid-layout">
+    <div class="recipes-grid-layout" id="recipe-container">
         {% for meal in meals %}
-        <div class="recipe-card-detailed">
-            <div class="card-img-wrapper">
-                <img src="{{ meal.strMealThumb }}" alt="{{ meal.strMeal }}">
-                <span class="area-badge">{{ meal.strArea if meal.strArea else 'International' }}</span>
-            </div>
-            <div class="card-body">
-                <div class="safety-tags">
-                    <span class="badge-tag safe">100% Verified</span>
-                    <span class="badge-tag category">{{ meal.strCategory }}</span>
+        <a href="/recipe/{{ meal.idMeal if meal.idMeal else meal.id }}" class="recipe-card-link"
+            style="text-decoration: none; color: inherit; display: block;">
+            <div class="recipe-card-detailed">
+                <div class="card-img-wrapper">
+                    <img src="{{ meal.strMealThumb }}" alt="{{ meal.strMeal }}">
+                    <span class="area-badge">{{ meal.strArea if meal.strArea else 'International' }}</span>
                 </div>
-                <h3 class="recipe-name">{{ meal.strMeal }}</h3>
-                <div class="recipe-meta">
-                    <span> ⏲️{{ meal.cook_label }}</span>
-                    <span> . </span>
-                    <span> 🥗{{ meal.prep_label }}</span>
+                <div class="card-body">
+                    <div class="safety-tags">
+                        <span class="badge-tag safe">100% Verified</span>
+                        {% if meal.strCategory %}
+                        <span class="badge-tag category">{{ meal.strCategory }}</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="recipe-name">{{ meal.strMeal }}</h3>
+                    <div class="recipe-meta">
+                        {% if meal.cook_label %}
+                        <span>⏲️ {{ meal.cook_label }}</span>
+                        {% endif %}
+                        {% if meal.prep_label %}
+                        <span>🥗 {{ meal.prep_label }}</span>
+                        {% endif %}
+                    </div>
                 </div>
-                <a href="/recipe/{{ meal.idMeal }}" class="btn-view-recipe">View Recipe & Allergen Details &rarr;</a>
             </div>
-        </div>
+        </a>
         {% endfor %}
+    </div>
+
+    <!-- Load more button -->
+    <div class="load-more-wrapper" style="text-align: center; margin: 30px 0;">
+        {% if has_more %}
+        <button id="load-more-btn" class="btn-load-more">
+            <span>Load More Recipes</span>
+            <svg class="load-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+        </button>
+        {% else %}
+        <div class="reached-end-badge">
+            <span class="end-icon">✨</span>
+            <span>You've reached the end of the list!</span>
+        </div>
+        {% endif %}
     </div>
     {% else %}
     <div class="no-results">
@@ -83,26 +153,18 @@
         <p>Try searching with different keywords or deselect some filters.</p>
     </div>
     {% endif %}
-    {% endif %}
+
     <!-- Browse Country Flags Section -->
     <div class="country-flags-container" style="text-align: center; margin: 30px 0;">
         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">🌐 Browse by Country</h3>
-        <div class="flags-grid"
-            style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 900px; margin: 0 auto;">
-            <a href="{{ url_for('recipes_by_flag', area='American') }}" title="American">🇺🇸</a>
-            <a href="{{ url_for('recipes_by_flag', area='British') }}" title="British">🇬🇧</a>
-            <a href="{{ url_for('recipes_by_flag', area='Canadian') }}" title="Canadian">🇨🇦</a>
-            <a href="{{ url_for('recipes_by_flag', area='Chinese') }}" title="Chinese">🇨🇳</a>
-            <a href="{{ url_for('recipes_by_flag', area='French') }}" title="French">🇫🇷</a>
-            <a href="{{ url_for('recipes_by_flag', area='Indian') }}" title="Indian">🇮🇳</a>
-            <a href="{{ url_for('recipes_by_flag', area='Italian') }}" title="Italian">🇮🇹</a>
-            <a href="{{ url_for('recipes_by_flag', area='Japanese') }}" title="Japanese">🇯🇵</a>
-            <a href="{{ url_for('recipes_by_flag', area='Mexican') }}" title="Mexican">🇲🇽</a>
-            <a href="{{ url_for('recipes_by_flag', area='Thai') }}" title="Thai">🇹🇭</a>
-            <a href="{{ url_for('recipes_by_flag', area='Vietnamese') }}" title="Vietnamese">🇻🇳</a>
-            <a href="{{ url_for('recipes_by_flag', area='Vietnamese') }}"
-                style="font-weight: 600; font-size: 14px; text-decoration: none; color: var(--primary-orange); margin-left: 8px;">+
-                See All Countries</a>
+        <div class="flags-grid">
+            {% for key, info in countries.items() %}
+            <a href="{{ url_for('recipes_by_flag', area=key) }}" class="flag-card">
+                <img src="https://flagcdn.com/w40/{{ info.code|lower }}.png" alt="{{ info.name }}"
+                    style="width: 24px; height: 16px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                <span class="country-name" style="font-weight: 600; font-size: 0.95rem;">{{ info.name }}</span>
+            </a>
+            {% endfor %}
         </div>
     </div>
 </section>

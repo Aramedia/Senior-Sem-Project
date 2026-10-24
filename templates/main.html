@@ -14,10 +14,10 @@
             your profile, instantly discover safe recipes, grocery brands, and local restaurants—certified safe for
             you.
         </p>
-    <div class="hero-actions">
-        <a href="{{ url_for('profile') }}" class="btn-primary">Build Your Free Profile &rarr;</a>
-        <a href="#" class="btn-secondary">See How We Verify</a>
-    </div>
+        <div class="hero-actions">
+            <a href="{{ url_for('profile') }}" class="btn-primary">Build Your Free Profile &rarr;</a>
+            <a href="#" class="btn-secondary">See How We Verify</a>
+        </div>
         <div class="social-proof">
             <div class="avatar-group">
                 <img src="https://via.placeholder.com/32" alt="Dietitian 1">
@@ -139,28 +139,31 @@
             <div class="recipes-grid">
                 {% if recipes %}
                 {% for meal in recipes %}
-                <div class="recipe-card">
-                    <div class="recipe-card-image-wrapper">
-                        <img src="{{ meal.image }}" alt="{{ meal.name }}" class="recipe-card-image">
-                        <span class="badge-tag verified">100% Verified</span>
-                    </div>
-
-                    <div class="recipe-card-content">
-                        <div class="recipe-tags-group">
-                            <span class="badge-tag area-tag">{{ meal.area if meal.area else 'International' }}</span>
-                            <span class="badge-tag category-tag">{{ meal.category }}</span>
+                <a href="/recipe/{{ meal.idMeal if meal.idMeal else meal.id }}" class="recipe-card-link"
+                    style="text-decoration: none; color: inherit; display: block;">
+                    <div class="recipe-card">
+                        <div class="recipe-card-image-wrapper">
+                            <img src="{{ meal.image }}" alt="{{ meal.name }}" class="recipe-card-image">
+                            <span class="badge-tag verified">100% Verified</span>
                         </div>
 
-                        <h3 class="recipe-title">{{ meal.name }}</h3>
+                        <div class="recipe-card-content">
+                            <div class="recipe-tags-group">
+                                <span class="badge-tag area-tag">{{ meal.area if meal.area else 'International'
+                                    }}</span>
+                                <span class="badge-tag category-tag">{{ meal.category }}</span>
+                            </div>
 
-                        <div class="recipe-meta">
-                            <span class="meta-item">⏲️ {{ meal.cooktime }}</span>
-                            <span class="meta-divider">.</span>
-                            <span class="meta-item">🥗 {{ meal.prep_label }}</span>
+                            <h3 class="recipe-title">{{ meal.name }}</h3>
+
+                            <div class="recipe-meta">
+                                <span class="meta-item">⏲️ {{ meal.cooktime }}</span>
+                                <span class="meta-item">🥗 {{ meal.prep_label }}</span>
+                            </div>
+
                         </div>
-
                     </div>
-                </div>
+                </a>
                 {% endfor %}
                 {% endif %}
 
@@ -371,87 +374,4 @@
         </details>
     </div>
 </section>
-
-<!-- 10. CTA Banner Section -->
-<section class="cta-banner">
-    <div class="cta-content">
-        <h2 class="cta-title">Begin your transition with ease.</h2>
-        <p class="cta-subtitle">Build your custom safe dietary profile today and unlock hundreds of dietitian-vetted
-            recipes, grocery lists, and safe local tables.</p>
-        <div class="cta-buttons">
-            <a href="{{ url_for('profile') }}" class="btn-primary">Build Free Profile &rarr;</a>
-            <a href="#" class="btn-outline">Speak to a Wellness Specialist</a>
-        </div>
-    </div>
-</section>
-
-<!-- 11. Footer -->
-<footer class="footer">
-    <div class="footer-top">
-        <div class="footer-brand">
-            <div class="logo">
-                <span class="logo-icon">O</span>
-                <span class="logo-text">SafePlate</span>
-            </div>
-            <p class="footer-desc">
-                SafePlate provides supportive planning utilities to help individuals adapt to new dietary patterns
-                safely. We advocate for structured healthcare consults alongside app-based dietary mapping.
-            </p>
-        </div>
-
-        <div class="footer-links-group">
-            <div class="footer-col">
-                <h4 class="footer-col-title">PRODUCT</h4>
-                <ul>
-                    <li><a href="{{ url_for('profile') }}">Profile Builder</a></li>
-                    <li><a href="#">Recipe Engine</a></li>
-                    <li><a href="#">Grocery Scanner</a></li>
-                    <li><a href="#">Map Finder</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h4 class="footer-col-title">SAFETY STANDARD</h4>
-                <ul>
-                    <li><a href="#">Our Science Panel</a></li>
-                    <li><a href="#">Verification Steps</a></li>
-                    <li><a href="#">Partner Cafes</a></li>
-                    <li><a href="#">Submit Protocol</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h4 class="footer-col-title">RESOURCES</h4>
-                <ul>
-                    <li><a href="#">Diet Guides</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Community Stories</a></li>
-                    <li><a href="#">Clinical Disclaimers</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <p class="disclaimer">
-            <strong>Medical Disclaimer:</strong> SafePlate is an information-aggregator tool and is not a substitute
-            for clinical diagnosis, dietary medical advice, or customized clinical plans. Always verify allergen
-            cross-contact risks with raw ingredient manufacturers and discuss any permanent nutritional shifts with
-            your physician or registered dietitian.
-        </p>
-        <div class="footer-meta">
-            <span>© 2026 SafePlate Inc. All rights reserved. Vetted and designed for happy, healthy plates.</span>
-            <div class="social-links">
-                <a href="#">📷</a>
-                <a href="#">📘</a>
-                <a href="#">🐤</a>
-            </div>
-        </div>
-    </div>
-</footer>
-<!-- 11. Button Back to Top -->
-<button id="backToTopBtn" title="Go on top">↑</button>
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-</body>
-
 {% endblock %}

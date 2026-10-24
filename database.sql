@@ -1,150 +1,183 @@
 PRAGMA foreign_keys = ON;
 
+DROP VIEW IF EXISTS available_countries_view;
+DROP VIEW IF EXISTS safe_products;
+DROP VIEW IF EXISTS establishments_for_user;
+DROP VIEW IF EXISTS safe_recipes;
+DROP VIEW IF EXISTS user_dietary_restrictions_view;
+
+DROP TABLE IF EXISTS store_products;
+DROP TABLE IF EXISTS establishment_accommodations;
+DROP TABLE IF EXISTS establishments;
+DROP TABLE IF EXISTS product_tags;
+DROP TABLE IF EXISTS product_dietary_restrictions;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS user_saved_recipes;
+DROP TABLE IF EXISTS recipe_ingredients;
+DROP TABLE IF EXISTS recipes;
+DROP TABLE IF EXISTS ingredient_dietary_restrictions;
+DROP TABLE IF EXISTS ingredients;
+DROP TABLE IF EXISTS user_dietary_restrictions;
+DROP TABLE IF EXISTS dietary_restrictions;
 DROP TABLE IF EXISTS users;
 
 -- user table
 CREATE TABLE users ( 
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_email VARCHAR(255) NOT NULL UNIQUE,
-    user_password_hash VARCHAR(255) NOT NULL,   
-    display_name VARCHAR(255) NOT NULL,
-    zip_code VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);  
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL UNIQUE,
+    user_password_hash TEXT NOT NULL,   
+    display_name TEXT,
+    zip_code TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+); 
 
 -- dietary restrictions table
 CREATE TABLE dietary_restrictions (
-    restriction_id INT AUTO_INCREMENT PRIMARY KEY,
-    restriction_name VARCHAR(255) NOT NULL UNIQUE,
-    category VARCHAR(255) NOT NULL CHECK (category IN ('allergy', 'medical', 'lifestyle', 'other'))  
+    restriction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    restriction_name TEXT NOT NULL UNIQUE,
+    category TEXT NOT NULL CHECK (category IN ('allergy', 'medical', 'lifestyle', 'other'))  
 );
 
 -- table that links user to dietary restcrictions
 CREATE TABLE user_dietary_restrictions (
-    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    restriction_id INT REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE,
-    severity VARCHAR(255) NOT NULL CHECK severity IN ('mild', 'moderate', 'severe')),
-    PRIMARY KEY (user_id, restriction_id)
-    FOREIGN KEY (user_email) REFERENCES users(user_email) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL,
+    restriction_id INTEGER NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'moderate' CHECK (severity IN ('mild', 'moderate', 'severe')),
+    PRIMARY KEY (user_id, restriction_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (restriction_id) REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE
 );
 
 -- ingredients table
 CREATE TABLE ingredients (
-    ingredient_id INT AUTO_INCREMENT PRIMARY KEY,
-    ingredient_name VARCHAR(255) NOT NULL UNIQUE,
-    category VARCHAR(255) NOT NULL CHECK (category IN ('vegetable', 'fruit', 'grain', 'protein', 'dairy', 'spice', 'other'))
+    ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_name TEXT NOT NULL UNIQUE,
+    category TEXT NOT NULL CHECK (category IN ('vegetable', 'fruit', 'grain', 'protein', 'dairy', 'spice', 'other'))
 );
 
 -- table that links ingredients to dietary restrictions
 CREATE TABLE ingredient_dietary_restrictions (
-    ingredient_id INT REFERENCES ingredients(ingredient_id) ON DELETE CASCADE,
-    restriction_id INT REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE,
-    PRIMARY KEY (ingredient_id, restriction_id)
+    ingredient_id INTEGER NOT NULL,
+    restriction_id INTEGER NOT NULL,
+    PRIMARY KEY (ingredient_id, restriction_id),
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id) ON DELETE CASCADE,
+    FOREIGN KEY (restriction_id) REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE
 );
 
 -- recipe table
 CREATE TABLE recipes (
-    recipe_id INT AUTO_INCREMENT PRIMARY KEY,
-    recipe_name VARCHAR(255) NOT NULL,
+    recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recipe_name TEXT NOT NULL,
     instructions TEXT NOT NULL,
-    created_by INT REFERENCES users(user_id) ON DELETE SET NULL,
+    created_by INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    source_url VARCHAR(255)
+    source_url TEXT,
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 -- table that links recipes to ingredients
 CREATE TABLE recipe_ingredients (
-    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE,
-    ingredient_id INT REFERENCES ingredients(ingredient_id) ON DELETE CASCADE,
-    quantity VARCHAR(255) NOT NULL,
-    PRIMARY KEY (recipe_id, ingredient_id)
-);  
+    recipe_id INTEGER NOT NULL,
+    ingredient_id INTEGER NOT NULL,
+    quantity TEXT NOT NULL,
+    PRIMARY KEY (recipe_id, ingredient_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id) ON DELETE CASCADE
+);
 
 -- table for saved recipes by users
 CREATE TABLE user_saved_recipes (
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    recipe_id INT NOT NULL REFERENCES recipes(recipe_id) ON DELETE CASCADE,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-    saved_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, recipe_id)
+    user_id INTEGER NOT NULL,
+    recipe_id INTEGER NOT NULL,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
 -- brands table
 CREATE TABLE brands (
-    brand_id INT AUTO_INCREMENT PRIMARY KEY,
-    brand_name VARCHAR(255) NOT NULL UNIQUE,
-    website_url VARCHAR(255)
-);  
+    brand_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    brand_name TEXT NOT NULL UNIQUE,
+    website_url TEXT
+);
 
 -- products table
 CREATE TABLE products (
-    product_id INT AUTO_INCREMENT PRIMARY KEY,
-    product_name VARCHAR(255) NOT NULL,
-    brand_id INT REFERENCES brands(brand_id) ON DELETE SET NULL,
+    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_name TEXT NOT NULL,
+    brand_id INTEGER,
     ingredients TEXT NOT NULL,
     nutrition_facts TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    FOREIGN KEY (brand_id) REFERENCES brands(brand_id) ON DELETE SET NULL
 );
 
 -- table that links products to dietary restrictions
 CREATE TABLE product_dietary_restrictions (
-    product_id INT REFERENCES products(product_id) ON DELETE CASCADE,
-    restriction_id INT REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE,
-    PRIMARY KEY (product_id, restriction_id)
-);  
+    product_id INTEGER NOT NULL,
+    restriction_id INTEGER NOT NULL,
+    PRIMARY KEY (product_id, restriction_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (restriction_id) REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE
+); 
 
 -- table that tag products are suitable for specific dietary restrictions
 CREATE TABLE product_tags (
-    product_id INT NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
-    restriction_id INT NOT NULL REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE,
-    source VARCHAR(255) NOT NULL 'label' CHECK (source IN ('label', 'manufacturer', 'third-party')),
-    may_contain_traces INT NOT NULL DEFAULT 0 CHECK (may_contain_traces IN (0, 1)),
-    verified_at VARCHAR(255),
-    PRIMARY KEY (product_id, restriction_id, source)
+    product_id INTEGER NOT NULL,
+    restriction_id INTEGER NOT NULL,
+    source TEXT NOT NULL DEFAULT 'label' CHECK (source IN ('label', 'manufacturer', 'third-party')),
+    may_contain_traces INTEGER NOT NULL DEFAULT 0 CHECK (may_contain_traces IN (0, 1)),
+    verified_at TEXT,
+    PRIMARY KEY (product_id, restriction_id, source),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (restriction_id) REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE
 );
 
 -- restaurant/grocery store table
 CREATE TABLE establishments (
-    establishment_id INT AUTO_INCREMENT PRIMARY KEY,
-    establishment_name VARCHAR(255) NOT NULL,
-    establishment_type VARCHAR(255) NOT NULL CHECK (establishment_type IN ('restaurant', 'grocery store', 'other')),
-    address VARCHAR(255) NOT NULL,
-    city VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
-    zip_code VARCHAR(10) NOT NULL,
-    phone_number VARCHAR(20),
-    website_url VARCHAR(255)
+    establishment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    establishment_name TEXT NOT NULL,
+    establishment_type TEXT NOT NULL CHECK (establishment_type IN ('restaurant', 'grocery store', 'other')),
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    zip_code TEXT NOT NULL,
+    phone_number TEXT,
+    website_url TEXT
 );  
 
 -- establishments accommodations for dietary restrictions
 CREATE TABLE establishment_accommodations (
-    establishment_id INT NOT NULLREFERENCES establishments(establishment_id) ON DELETE CASCADE,
-    restriction_id INT NOT NULL REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE,
-    support_level VARCHAR(255) NOT NULL DEFAULT 'options'
-    CHECK (support_level IN ('dedicated', 'options', 'can_modify', 'not_supported')),
-    source VARCHAR(255) NOT NULL CHECK (source IN ('menu', 'staff', 'website', 'other')),
-    verified_at TIMESTAMP,
-    PRIMARY KEY (establishment_id, restriction_id)
+    establishment_id INTEGER NOT NULL,
+    restriction_id INTEGER NOT NULL,
+    support_level TEXT NOT NULL DEFAULT 'options' CHECK (support_level IN ('dedicated', 'options', 'can_modify', 'not_supported')),
+    source TEXT NOT NULL CHECK (source IN ('menu', 'staff', 'website', 'other')),
+    verified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (establishment_id, restriction_id),
+    FOREIGN KEY (establishment_id) REFERENCES establishments(establishment_id) ON DELETE CASCADE,
+    FOREIGN KEY (restriction_id) REFERENCES dietary_restrictions(restriction_id) ON DELETE CASCADE
 );
+
  -- table for which products a store carries
- CREATE TABLE store_products (
-    establishment_id INT NOT NULL REFERENCES establishments(establishment_id) ON DELETE CASCADE,
-    product_id INT NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
-    PRIMARY KEY (establishment_id, product_id)
+CREATE TABLE store_products (
+    establishment_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    PRIMARY KEY (establishment_id, product_id),
+    FOREIGN KEY (establishment_id) REFERENCES establishments(establishment_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
 -- indexes for faster lookups
-CREATE INDEX idx_recipe_name ON recipes_ingredients(ingredient_id); 
-CREATE INDEX idx_ing_viol_restriction ON ingredient_violations(restriction_id); 
-CREATE INDEX idx_user_restr_restr ON user_restrictions(restriction_id);
+CREATE INDEX idx_recipe_ingredients_ing ON recipe_ingredients(ingredient_id); 
+CREATE INDEX idx_ing_diet_restr ON ingredient_dietary_restrictions(restriction_id); 
+CREATE INDEX idx_user_diet_restr ON user_dietary_restrictions(restriction_id);
 CREATE INDEX idx_products_brand ON products(brand_id);
-CREATE INDEX idx_psf_restriction ON product_dietary_restrictions(restriction_id);
-CREATE INDEX idx_establishment_type_loc ON establishments(establishment_type, city, state, zip_code);
-CREATE INDEX idx_pa_restriction ON establishment_accommodations(restriction_id);
+CREATE INDEX idx_prod_diet_restr ON product_dietary_restrictions(restriction_id);
+CREATE INDEX idx_establishment_loc ON establishments(establishment_type, city, state, zip_code);
+CREATE INDEX idx_est_accommodations ON establishment_accommodations(restriction_id);
 
 -- views for easier access to data
 
@@ -215,6 +248,21 @@ WHERE NOT EXISTS (
     JOIN user_dietary_restrictions udr ON pt.restriction_id = udr.restriction_id
     WHERE p.product_id = pt.product_id AND ur_count.user_id = udr.user_id
 ) = ur_count.needed;
+
+-- View that retrieves a list of countries that actually have dishes (including 'International')CREATE VIEW IF NOT EXISTS available_countries_view AS
+CREATE VIEW available_countries_view AS
+SELECT DISTINCT 
+    a.area_name, 
+    a.country_name, 
+    a.country_code, 
+    a.flag_url
+FROM areas_cache a
+INNER JOIN recipe_cache r ON (
+    r.area = a.area_name 
+    OR (a.area_name = 'International' AND (r.area IS NULL OR r.area = '' OR r.area = 'Unknown' OR r.area = 'International'))
+)
+ORDER BY CASE WHEN a.area_name = 'International' THEN 1 ELSE 0 END, a.country_name ASC;
+
 
 -- STARTER DATA
 

@@ -220,10 +220,10 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Custom Database Files for Safeplate
-*.db
-*.sqlite
-*.sqlite3
-safeplate.db
+# *.db
+# *.sqlite
+# *.sqlite3
+# safeplate.db
 
 # OS
 .DS_Store

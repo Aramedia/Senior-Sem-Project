@@ -1,8 +1,11 @@
 import sqlite3
 from urllib import response
 import random
+import os
+import json
 import re
 from flask import Flask, flash, redirect, render_template, request, url_for
+from concurrent.futures import ThreadPoolExecutor
 import requests
 from flask_login import (
     LoginManager,
@@ -54,6 +57,12 @@ def init_db():
         )
     ''')
 
+    try:
+        with open('database.sql', 'r', encoding='utf-8') as f:
+            conn.executescript(f.read())
+    except Exception as e:
+        print(f"Note: Error or notice while executing database.sql: {e}")
+
     conn.commit()
     conn.close()
 
@@ -76,63 +85,7 @@ def load_user(user_id):
       return User(id=user['id'], 
                   email=user['email'], 
                   password=user['password'])
-  return None
-
-#  take all the recipes ịn the library
-def get_filtered_meals_fast_from_api(prep_filter, type_filter, target_count = 15):
-    """Quickly find items that meet the filter criteria by randomly scanning through a few characters, stopping as soon as 15 items have been collected from TheMealDB API."""
-    filtered_meals = []
-    seen_ids = set()
-
-    # 1) Randomly shuffle the 26 letters of the alphabet
-    letters = list('abcdefghijklmnopqrstuvwxyz')
-    random.shuffle(letters)
-
-    for letter in letters:
-        try:
-            res = requests.get(f'https://www.themealdb.com/api/json/v1/1/search.php?f={letter}')
-            raw_meals = res.json().get('meals') or []
-            
-            for meal in raw_meals:
-                meal_id = meal.get('idMeal')
-                if not meal_id or meal_id in seen_ids:
-                    continue
-                
-                # Count for each meals
-                raw_instructions = meal.get('strInstructions', '')
-                cook_label = get_cooking_label(raw_instructions)
-                prep_label = get_prep_label(meal)
-
-                # Check the number of ingredient
-                if prep_filter == 'minimal' and prep_label != 'Easy to prepare':
-                    continue
-                if prep_filter == 'standard' and prep_label != 'Standard to prepare':
-                    continue
-                if prep_filter == 'complex' and prep_label != 'Hard to prepare':
-                    continue
-
-                # Check base on Recipes Instruction
-                if type_filter == 'quick' and cook_label != 'Quick and Easy':
-                    continue
-                if type_filter == 'standard' and cook_label != 'Standard Cooking':
-                    continue
-                if type_filter == 'detailed' and cook_label != 'Home cooked Special (Longer Recipe)':
-                    continue
-
-                # Assign labels and add valid items
-                meal['cook_label'] = cook_label
-                meal['prep_label'] = prep_label
-                seen_ids.add(meal_id)
-                filtered_meals.append(meal)
-
-                # Stop when enough 15 meals
-                if len(filtered_meals) >= target_count:
-                    return filtered_meals
-
-        except Exception as e:
-            print(f"Error fetching letter {letter}: {e}")
-            
-    return filtered_meals
+  return None           
 
 # Rank for recipes based on their tags
 def get_cooking_label(instructions_input):
@@ -178,40 +131,69 @@ def get_prep_label(meal_or_ingredients):
         return "Standard to prepare"
     else:
         return "Hard to prepare"
+    
 
+def get_flag_emoji(country_code):
+    """ Change code name of countries 'VN', 'IE' become flag Emoji ."""
+    if not country_code or len(country_code) != 2:
+        return "🌐"
+    return chr(127397 + ord(country_code[0].upper())) + chr(127397 + ord(country_code[1].upper()))
+
+# Take the list of country from safeplate.DB
+def get_countries_from_db():
+    """Retrieve a list of countries, including flag information, from the 'areas_cache' table in SQLite."""
+    conn = get_db_connection()
+    try:
+    # Take a list of all area have a meal, avoid country don't have meals
+        rows = conn.execute('SELECT * FROM available_countries_view').fetchall() 
+    except Exception as e:
+        print(f"Error executing view: {e}")
+        rows = []   
+    conn.close()
+
+    countries = {}
+    for row in rows:
+        countries[row['area_name']] = {
+            'code': row['country_code'],
+            'name': row['country_name'],
+            'flag_url': row['flag_url'],
+            'emoji': get_flag_emoji(row['country_code']) 
+        }
+    return countries
 
 # Main route for the home page
 
 # 1. main.html
 @app.route('/')
 def home():
-  recipes = []
-  try:
-    # Call API of TheMealDB to get 8 random recipes
-    raw_recipes = get_random_letter_meals(8)
+    recipes = []
+    try:
+        conn = get_db_connection()
+        # Take 8 random recipes from SQLite database
+        rows = conn.execute('SELECT raw_data FROM recipe_cache ORDER BY RANDOM() LIMIT 8').fetchall()
+        conn.close()
 
-    # Transfer data to main.html
-    for meal in raw_recipes:
-        raw_tags = meal.get('strTags')
-        tags_list = raw_tags.split(',') if raw_tags else [meal.get('strCategory', 'SAFE')]
+        for row in rows:
+            meal = json.loads(row['raw_data'])
+            raw_tags = meal.get('strTags')
+            tags_list = raw_tags.split(',') if raw_tags else [meal.get('strCategory', 'SAFE')]
+            raw_instructions = meal.get('strInstructions', '')
 
-        raw_instructions = meal.get('strInstructions', '')
-        cook_label = get_cooking_label(raw_instructions)
-        prep_label = get_prep_label(meal)
-        
-        recipes.append ({
+            recipes.append({
                 'id': meal.get('idMeal'),
+                'idMeal': meal.get('idMeal'),
                 'name': meal.get('strMeal'),
                 'category': meal.get('strCategory'),
                 'area': meal.get('strArea'),
                 'image': meal.get('strMealThumb'),
-                'cooktime': cook_label,
-                'prep_label': prep_label,
+                'cooktime': get_cooking_label(raw_instructions),
+                'prep_label': get_prep_label(meal),
                 'tags': tags_list
             })
-  except Exception as e:
-    print(f"Error fetching recipes: {e}")
-  return render_template('main.html', recipes=recipes)
+    except Exception as e:
+        print(f"Error loading home recipes: {e}")
+
+    return render_template('main.html', recipes=recipes)
 
 
 # 2. Processing Register
@@ -287,201 +269,270 @@ def logout():
   return redirect(url_for('home'))
 
 # TheMealDB API: https://www.themealdb.com/api.php
-@app.route('/recipes', methods=['GET', 'POST'])
+@app.route('/recipes', methods=['GET'])
 def search_recipes():
-    # 1) Take filter data from URL
-    prep_filter = request.args.get('prep', '').strip() # easy, standard or hard to prepare
-    type_filter = request.args.get('type', '').strip() # quick, stard, detail(long) recipes
-    category_filter = request.args.get('category','').strip()
+    keyword = request.args.get('keyword', '').strip()   # 🌟 Đã sửa lấy từ GET
+    diet_filter = request.args.get('diet', '').strip()  # Gluten-Free, Vegan, Dairy-Free...
+    prep_filter = request.args.get('prep', '').strip()  # minimal, standard, complex
+    type_filter = request.args.get('type', '').strip()  # quick, standard, detailed
+    category_filter = request.args.get('category', '').strip()
+    page = int(request.args.get('page', 1))              # Supports "Load More"
+    limit = 15
 
-    # If use the filter for prepare and type
-    if (prep_filter or type_filter) and request.method == 'GET':
-        meals = get_filtered_meals_fast_from_api(prep_filter, type_filter, target_count=15)
-        return render_template('recipes.html', meals=meals)
-    
+    # Lấy số lượng món tương ứng với trang hiện tại
+    fetch_limit = page * limit
+    offset = 0
+
+    conn = get_db_connection()
+    total_count = 0
+
+    # 1) Filter directly using SQL based on keyword and dietary_tags
+    if keyword:
+        if diet_filter and diet_filter.lower() != 'all':
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache 
+                WHERE name LIKE ? AND dietary_tags LIKE ?
+            ''', (f'%{keyword}%', f'%{diet_filter}%')).fetchone()[0]
+
+            query = '''SELECT raw_data, dietary_tags 
+                    FROM recipe_cache 
+                    WHERE name LIKE ? 
+                    AND dietary_tags LIKE ? 
+                    LIMIT ? OFFSET ?'''
+            rows = conn.execute(query, (f'%{keyword}%', f'%{diet_filter}%', fetch_limit + 1, offset)).fetchall()
+        else:
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache WHERE name LIKE ?
+            ''', (f'%{keyword}%',)).fetchone()[0]
+
+            query = '''SELECT raw_data, dietary_tags  
+                    FROM recipe_cache 
+                    WHERE name LIKE ? 
+                    LIMIT ? OFFSET ?'''
+            rows = conn.execute(query, (f'%{keyword}%', fetch_limit + 1, offset)).fetchall()
+
+    elif category_filter:
+        if diet_filter and diet_filter.lower() != 'all':
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache 
+                WHERE category = ? AND dietary_tags LIKE ?
+            ''', (category_filter, f'%{diet_filter}%')).fetchone()[0]
+
+            query = '''SELECT raw_data, dietary_tags 
+                    FROM recipe_cache 
+                    WHERE category = ? AND dietary_tags LIKE ? 
+                    LIMIT ? OFFSET ?'''
+            rows = conn.execute(query, (category_filter, f'%{diet_filter}%', fetch_limit + 1, offset)).fetchall()
+        else:
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache WHERE category = ?
+            ''', (category_filter,)).fetchone()[0]
+
+            query = '''SELECT raw_data, dietary_tags
+                    FROM recipe_cache 
+                    WHERE category = ? 
+                    LIMIT ? OFFSET ?'''
+            rows = conn.execute(query, (category_filter, fetch_limit + 1, offset)).fetchall()
+
+    elif diet_filter and diet_filter.lower() != 'all':
+        total_count = conn.execute('''
+            SELECT COUNT(*) FROM recipe_cache WHERE dietary_tags LIKE ?
+        ''', (f'%{diet_filter}%',)).fetchone()[0]
+
+        query = '''SELECT raw_data, dietary_tags  
+                FROM recipe_cache 
+                WHERE dietary_tags LIKE ? 
+                LIMIT ? OFFSET ?'''
+        rows = conn.execute(query, (f'%{diet_filter}%', fetch_limit + 1, offset)).fetchall()
+
+    else:
+        total_count = conn.execute('SELECT COUNT(*) FROM recipe_cache').fetchone()[0]
+        rows = conn.execute('''
+            SELECT raw_data, dietary_tags 
+            FROM recipe_cache 
+            LIMIT ? OFFSET ?''', (fetch_limit + 1, offset)).fetchall()
+
+    conn.close()
+
+    # 2) Read out the data and assign secondary labels
+    has_more = len(rows) > fetch_limit
+    display_rows = rows[:fetch_limit]
     meals = []
 
-    # 2) Take the original data
-    if request.method == 'POST':
-        keyword = request.form.get('keyword', '').strip()
-        if keyword:
-            try:
-                res = requests.get(f'https://www.themealdb.com/api/json/v1/1/search.php?s={keyword}')
-                meals = res.json().get('meals') or []
-            except Exception as e:
-                print(f"Error searching: {e}")
-        else:
-            meals = get_random_letter_meals(15)
-    elif category_filter:
-        try:
-            res = requests.get(f'https://www.themealdb.com/api/json/v1/1/filter.php?c={category_filter}')
-            meals = res.json().get('meals') or []
-        except Exception as e:
-            print(f"Error category: {e}")
-    else:
-        meals = get_random_letter_meals(15)
+    for row in display_rows:
+        meal = json.loads(row['raw_data'])
+        cook_label = get_cooking_label(meal.get('strInstructions', ''))
+        prep_label = get_prep_label(meal)
 
-    for meal in meals:
-        raw_instructions = meal.get('strInstructions', '')
-        meal['cook_label'] = get_cooking_label(raw_instructions)
-        meal['prep_label'] = get_prep_label(meal)
+        diet_tags_str = row['dietary_tags'] if 'dietary_tags' in row.keys() and row['dietary_tags'] else ''
+        meal['diet_labels'] = diet_tags_str.split(',') if diet_tags_str else []
 
-    return render_template('recipes.html', meals = meals[:15])
+        # Prep Filter
+        if prep_filter == 'minimal' and prep_label != 'Easy to prepare': continue
+        if prep_filter == 'standard' and prep_label != 'Standard to prepare': continue
+        if prep_filter == 'complex' and prep_label != 'Hard to prepare': continue
 
+        # Type Filter
+        if type_filter == 'quick' and cook_label != 'Quick and Easy': continue
+        if type_filter == 'standard' and cook_label != 'Standard Cooking': continue
+        if type_filter == 'detailed' and cook_label != 'Home cooked Special (Longer Recipe)': continue
 
-# Supports retrieving multiple random, non-duplicate dishes.
-def get_random_letter_meals(count=15):
-    meals_pool = []
+        meal['cook_label'] = cook_label
+        meal['prep_label'] = prep_label
+        meals.append(meal)
 
-    letters = list('abcdefghijklmnopqrstuvwxyz')
-    random.shuffle(letters)  # Shuffle letters to ensure randomness
+    countries = get_countries_from_db()
 
-    try:
-        for letter in letters:
-            response = requests.get(f'https://www.themealdb.com/api/json/v1/1/search.php?s={letter}')
-            data = response.json()
-            raw_meals = data.get('meals') or []
-            
-            # Add unique meals to the pool
-            for meal in raw_meals:
-                if meal not in meals_pool:
-                    if not any(m['idMeal'] == meal['idMeal'] for m in meals_pool):          
-                        meals_pool.append(meal)
-            # Have we collected enough meals? If yes, break the loop.
-            if len(meals_pool) >= count:
-                break
-            
-        return meals_pool[:count]
-    except Exception as e:
-        print(f"Error fetching initial recipes: {e}")
-        return []
+    return render_template(
+        'recipes.html', 
+        meals=meals, 
+        countries=countries, 
+        selected_diet=diet_filter,
+        page=page,
+        has_more=has_more,
+        total_count=total_count
+    )
 
 # Route to display details of a specific dish based on its ID.
 @app.route('/recipe/<meal_id>')
 def recipe_detail(meal_id):
     try:
         # Call TheMealDB API to fetch details by meal ID
-        response = requests.get(f'https://www.themealdb.com/api/json/v1/1/lookup.php?i={meal_id}')
-        data = response.json()
-        meals = data.get('meals')
+        conn = get_db_connection()
+        row = conn.execute('SELECT raw_data FROM recipe_cache WHERE meal_id = ?', (meal_id,)).fetchone()
+        conn.close()
         
-        if meals:
-            meal = meals[0]
-            
-            # Automatically split the list of ingredients and their quantities
-            ingredients = []
-            for i in range(1, 21):
-                ingredient = meal.get(f'strIngredient{i}')
-                measure = meal.get(f'strMeasure{i}')
-                if ingredient and ingredient.strip():
-                    ingredients.append({
-                        'name': ingredient.strip(),
-                        'measure': measure.strip() if measure else ''
-                    })
-            # Correctly format the instructions recipes
-            raw_instructions = meal.get('strInstructions', '')
-            lines = raw_instructions.split('\r\n') if '\r\n' in raw_instructions else raw_instructions.split('\n')     
-            
-            cleaned_steps = []
-            pro_tips = []
-            is_tip_section = False
+        if not row:
+            return redirect(url_for('search_recipes'))
 
-            for line in lines:
-                text = line.strip()
-                if not text:
-                    continue
+        meal = json.loads(row['raw_data'])
 
-                if re.match(r'^(pro\s*tips?:?|notes?:?|tips?:?)$', text, re.IGNORECASE):
-                    is_tip_section = True
-                    continue
-                
-                # if in the Pro Tips section, summary all in the pro_tips
-                if is_tip_section:
-                    #  Delete "-", "*", "1.", if have, in the first of the line, and keep the rest of the text.
-                    cleaned_tip = re.sub(r'^[\*\-\d\.]+\s*', '', text).strip()
-                    if cleaned_tip:
-                        pro_tips.append(cleaned_tip)
-                    continue
+        # 1) Process ingredients first
+        ingredients = []
+        for i in range(1, 21):
+            ingredient = meal.get(f'strIngredient{i}')
+            measure = meal.get(f'strMeasure{i}')
+            if ingredient and ingredient.strip():
+                ingredients.append({
+                    'name': ingredient.strip(),
+                    'measure': measure.strip() if measure else ''
+                })
 
-                # Pass the number: "1", "2", "STEP 1", "STEP 2:")
-                if re.match(r'^(step\s*\d+:?|\d+\.?)$', text, re.IGNORECASE):
-                    continue
-                
-                # Delete "STEP 1:", "1.", "Step 2" in the first of the line, and keep the rest of the text.
-                text = re.sub(r'^(step\s*\d+:?|\d+[\.\)]\s*)', '', text, flags=re.IGNORECASE).strip()
-                
-                if text:
-                    cleaned_steps.append(text)  
+        # 2) Process instructions OUTSIDE of the ingredient loop
+        raw_instructions = meal.get('strInstructions', '')
+        lines = raw_instructions.split('\r\n') if '\r\n' in raw_instructions else raw_instructions.split('\n')
+        cleaned_steps = []
+        pro_tips = []
+        is_tip_section = False
 
-            # Determine the cooking label based on the instructions
-            cook_label = get_cooking_label(cleaned_steps)
-            prep_label = get_prep_label(ingredients)
+        for line in lines:
+            text = line.strip()
+            if not text:
+                continue
 
-            return render_template('recipeDetails.html', 
-                                   meal=meal, 
-                                   ingredients=ingredients, 
-                                   instructions=cleaned_steps, 
-                                   pro_tips=pro_tips,
-                                   cook_label=cook_label,
-                                   prep_label=prep_label)
+            if re.match(r'^(pro\s*tips?:?|notes?:?|tips?:?)$', text, re.IGNORECASE):
+                is_tip_section = True
+                continue
+
+            if is_tip_section:
+                cleaned_tip = re.sub(r'^[\*\-\d\.]+\s*', '', text).strip()
+                if cleaned_tip:
+                    pro_tips.append(cleaned_tip)
+                continue
+
+            if re.match(r'^(step\s*\d+:?|\d+\.?)$', text, re.IGNORECASE):
+                continue
+
+            text = re.sub(r'^(step\s*\d+:?|\d+[\.\)]\s*)', '', text, flags=re.IGNORECASE).strip()
+            if text:
+                cleaned_steps.append(text)
+
+        cook_label = get_cooking_label(cleaned_steps)
+        prep_label = get_prep_label(ingredients)
+
+        return render_template(
+            'recipeDetails.html', 
+            meal=meal, 
+            ingredients=ingredients, 
+            instructions=cleaned_steps, 
+            pro_tips=pro_tips,
+            cook_label=cook_label,
+            prep_label=prep_label
+        )
     except Exception as e:
         print(f"Error fetching recipe details: {e}")
 
     return redirect(url_for('search_recipes'))
 
-# Flag of TheMealDB
-COUNTRY_FLAGS = {
-    'American': {'code': 'US', 'flag': '🇺🇸', 'name': 'American'},
-    'British': {'code': 'GB', 'flag': '🇬🇧', 'name': 'British'},
-    'Canadian': {'code': 'CA', 'flag': '🇨🇦', 'name': 'Canadian'},
-    'Chinese': {'code': 'CN', 'flag': '🇨🇳', 'name': 'Chinese'},
-    'Croatian': {'code': 'HR', 'flag': '🇭🇷', 'name': 'Croatian'},
-    'Dutch': {'code': 'NL', 'flag': '🇳🇱', 'name': 'Dutch'},
-    'Egyptian': {'code': 'EG', 'flag': '🇪🇬', 'name': 'Egyptian'},
-    'Filipino': {'code': 'PH', 'flag': '🇵🇭', 'name': 'Filipino'},
-    'French': {'code': 'FR', 'flag': '🇫🇷', 'name': 'French'},
-    'Greek': {'code': 'GR', 'flag': '🇬🇷', 'name': 'Greek'},
-    'Indian': {'code': 'IN', 'flag': '🇮🇳', 'name': 'Indian'},
-    'Irish': {'code': 'IE', 'flag': '🇮🇪', 'name': 'Irish'},
-    'Italian': {'code': 'IT', 'flag': '🇮🇹', 'name': 'Italian'},
-    'Jamaican': {'code': 'JM', 'flag': '🇯🇲', 'name': 'Jamaican'},
-    'Japanese': {'code': 'JP', 'flag': '🇯🇵', 'name': 'Japanese'},
-    'Kenyan': {'code': 'KE', 'flag': '🇰🇪', 'name': 'Kenyan'},
-    'Malaysian': {'code': 'MY', 'flag': '🇲🇾', 'name': 'Malaysian'},
-    'Mexican': {'code': 'MX', 'flag': '🇲🇽', 'name': 'Mexican'},
-    'Moroccan': {'code': 'MA', 'flag': '🇲🇦', 'name': 'Moroccan'},
-    'Polish': {'code': 'PL', 'flag': '🇵🇱', 'name': 'Polish'},
-    'Portuguese': {'code': 'PT', 'flag': '🇵🇹', 'name': 'Portuguese'},
-    'Russian': {'code': 'RU', 'flag': '🇷🇺', 'name': 'Russian'},
-    'Spanish': {'code': 'ES', 'flag': '🇪🇸', 'name': 'Spanish'},
-    'Thai': {'code': 'TH', 'flag': '🇹🇭', 'name': 'Thai'},
-    'Tunisian': {'code': 'TN', 'flag': '🇹🇳', 'name': 'Tunisian'},
-    'Turkish': {'code': 'TR', 'flag': '🇹🇷', 'name': 'Turkish'},
-    'Vietnamese': {'code': 'VN', 'flag': '🇻🇳', 'name': 'Vietnamese'}
-}
 
+# 4. Route Country read from SQLite local
 @app.route('/recipes/flag')
 def recipes_by_flag():
-    selected_area = request.args.get('area', 'Vietnamese').strip()
+    selected_area = request.args.get('area', 'Canadian').strip()
+    page = int(request.args.get('page', 1))
+    limit = 15
+    fetch_limit = page * limit
+    offset = 0
     meals = []
-    
+
+    countries = get_countries_from_db()
+    country_info = countries.get(selected_area, {})
+    search_name = country_info.get('name', selected_area)
+
     try:
-        res = requests.get(f'https://www.themealdb.com/api/json/v1/1/filter.php?a={selected_area}')
-        raw_meals = res.json().get('meals') or []
-        # Take 15 recipes
-        for m in raw_meals[:15]:
-            detail_res = requests.get(f'https://www.themealdb.com/api/json/v1/1/lookup.php?i={m["idMeal"]}')
-            meal_data = detail_res.json().get('meals', [{}])[0]
+        conn = get_db_connection()
+        # Take 15 recipes of each country from CSDL local
+        if selected_area.lower() == 'international':
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache 
+                WHERE area IS NULL OR area = '' OR area = 'Unknown' OR area = 'International'
+            ''').fetchone()[0]
+
+            rows = conn.execute('''
+                SELECT raw_data, dietary_tags FROM recipe_cache 
+                WHERE area IS NULL OR area = '' OR area = 'Unknown' OR area = 'International'
+                LIMIT ? OFFSET ?
+            ''', (fetch_limit + 1, offset)).fetchall()
+        else:
+            total_count = conn.execute('''
+                SELECT COUNT(*) FROM recipe_cache 
+                WHERE area LIKE ? OR area LIKE ?
+            ''', (f'%{selected_area}%', f'%{search_name}%')).fetchone()[0]
+
+            rows = conn.execute('''
+                SELECT raw_data, dietary_tags FROM recipe_cache
+                WHERE area LIKE ? OR area LIKE ?
+                LIMIT ? OFFSET ?
+            ''', (f'%{selected_area}%', f'%{search_name}%', fetch_limit + 1, offset)).fetchall()
             
-            # Gán thông tin nhãn giống như bên search_recipes
+        conn.close()
+
+        # 🌟 Đã sửa: dùng fetch_limit để kiểm tra và cắt dữ liệu cho nút Load More
+        has_more = len(rows) > fetch_limit
+        display_rows = rows[:fetch_limit]
+
+        for row in display_rows:
+            meal_data = json.loads(row['raw_data'])
             raw_instructions = meal_data.get('strInstructions', '')
             meal_data['cook_label'] = get_cooking_label(raw_instructions)
             meal_data['prep_label'] = get_prep_label(meal_data)
-            
             meals.append(meal_data)
     except Exception as e:
-        print(f"Error fetching area meals: {e}")
-# 6. Dietary Profile
+        print(f"Error fetching area meals from DB: {e}")
+        has_more = False
+        total_count = 0
+
+
+    return render_template('recipesFlag.html', 
+                           meals=meals, 
+                           countries=countries, 
+                           selected_area=selected_area,
+                           page=page,
+                           has_more=has_more,
+                           total_count=total_count)
+
+
+# 5. Dietary Profile
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -545,15 +596,45 @@ def profile():
         selected_restrictions=selected_restrictions
     )
 
+@app.route('/diet-guide')
+def diet_guide():
+    diet_info = {}
+    diet_ingredients = {}
 
+    # Read the information of each diet
+    info_path = os.path.join(app.static_folder, 'diet_info.json')
+    if os.path.exists(info_path):
+        with open(info_path, 'r', encoding='utf-8') as f:
+            diet_info = json.load(f)
+
+    # Read list of ingredient
+    ingredients_path = os.path.join(app.static_folder, 'diet_ingredients.json')
+    if os.path.exists(ingredients_path):
+        with open(ingredients_path, 'r', encoding='utf-8') as f:
+            diet_ingredients = json.load(f)
+
+    return render_template('dietGuide.html', diet_info=diet_info, diet_ingredients=diet_ingredients)
+
+# Watch all ingredeient for each Diet Meals
+@app.route('/diet-ingredients/<diet_name>')
+def diet_ingredients_detail(diet_name):
+    diet_ingredients = {}
+
+    # Read file JSON:
+    ingredients_path = os.path.join(app.static_folder, 'diet_ingredients.json')
+    if os.path.exists(ingredients_path):
+        with open(ingredients_path, 'r', encoding='utf-8') as f:
+            diet_ingredients = json.load(f)
+
+    # Take list of Diet 
+    ingredients_list = diet_ingredients.get(diet_name, [])
 
     return render_template(
-        'recipesFlag.html', 
-        meals=meals[:15], 
-        countries=COUNTRY_FLAGS, 
-        selected_area=selected_area
+        'dietIngredients.html', 
+        diet_name=diet_name, 
+        ingredients=ingredients_list
     )
+
 if __name__ == '__main__':
     init_db()  # Automatically run the database initialization when the application launches
     app.run(debug=True)
-
