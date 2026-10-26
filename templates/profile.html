@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dietary Profile - SafePlate</title>
+    <title>My Profile - SafePlate</title>
 
     <style>
         body {
@@ -14,7 +14,7 @@
         }
 
         .profile-container {
-            max-width: 600px;
+            max-width: 650px;
             margin: auto;
             background: white;
             padding: 35px;
@@ -27,9 +27,35 @@
             text-align: center;
         }
 
+        h2 {
+            color: #315c3b;
+            margin-top: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
         p {
             text-align: center;
             color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
         }
 
         .restriction {
@@ -39,7 +65,7 @@
             border-radius: 8px;
         }
 
-        label {
+        .restriction label {
             cursor: pointer;
         }
 
@@ -76,11 +102,47 @@
 
 <div class="profile-container">
 
-    <h1>Build Your Dietary Profile</h1>
+    <h1>My Profile</h1>
 
-    <p>Select your dietary restrictions and preferences.</p>
+    <p>Manage your personal information and dietary preferences.</p>
 
     <form method="POST" action="{{ url_for('profile') }}">
+
+        <h2>Personal Information</h2>
+
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value="{{ first_name | default('', true) }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value="{{ last_name | default('', true) }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+                type="email"
+                id="email"
+                value="{{ email | default('', true) }}"
+                readonly
+            >
+        </div>
+
+        <h2>Dietary Information</h2>
+
+        <p>Select your dietary restrictions and preferences.</p>
 
         {% for restriction in restrictions_list %}
 
@@ -98,7 +160,27 @@
 
         {% endfor %}
 
-        <button type="submit">Save My Dietary Profile</button>
+        <div class="form-group">
+            <label for="ingredients_to_avoid">Ingredients to Avoid</label>
+            <textarea
+                id="ingredients_to_avoid"
+                name="ingredients_to_avoid"
+                rows="3"
+                placeholder="Example: Peanuts, sesame, artificial sweeteners"
+            >{{ ingredients_to_avoid | default('', true) }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="dietary_notes">Additional Dietary Notes</label>
+            <textarea
+                id="dietary_notes"
+                name="dietary_notes"
+                rows="3"
+                placeholder="Enter any additional dietary information"
+            >{{ dietary_notes | default('', true) }}</textarea>
+        </div>
+
+        <button type="submit">Save Changes</button>
 
     </form>
 

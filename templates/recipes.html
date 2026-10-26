@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Search Safe Recipes - SafePlate{% endblock %}
+
+{% block content %}
+<section class="recipes-search-hero">
+    <!-- Back to Home Link -->
+    <div class="back-navigation">
+        <button type="button" onclick="history.back()" class="btn-back">
+            ⬅ Go Back
+        </button>
+    </div>
+    <!-- Search Header -->
+    <div class="search-header">
+        <span class="sub-caption">SAFETY-FIRST RECIPE ENGINE</span>
+        <h1 class="section-title">Find the recipes that are safe for you.</h1>
+        <p class="section-subtitle">Filter recipes by keyword, dietary preferences, and allergen-free ingredients.</p>
+    </div>
+
+    <!-- Main search bar -->
+    <form action="/recipes" method="POST" class="search-bar-container">
+        <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="keyword" placeholder="Enter recipe name or ingredient (e.g., Chicken, Salad...)"
+                value="{{ request.form.get('keyword', '') }}" required>
+            <button type="submit" class="btn-primary">Search</button>
+        </div>
+
+        <!-- Dietary Filters -->
+        <div class="quick-diet-filters">
+            <span class="filter-label">Quick Filter:</span>
+            <button type="button" class="diet-chip active">🌿 All </button>
+            <button type="button" class="diet-chip"> 🍚Gluten-Free</button>
+            <button type="button" class="diet-chip"> 🥛Dairy-free</button>
+            <button type="button" class="diet-chip"> 🥬Vegan</button>
+            <button type="button" class="diet-chip"> 🥗Vegetarian</button>
+            <button type="button" class="diet-chip"> 🌰Nut-Free</button>
+            <button type="button" class="diet-chip"> 🌽Soy-Free</button>
+            <button type="button" class="diet-chip"> 🧆Halal</button>
+            <button type="button" class="diet-chip"> 🥯Kosher</button>
+            <button type="button" class="diet-chip"> 🧂Low-Sodium</button>
+        </div>
+    </form>
+</section>
+
+<!-- Result list -->
+<section class="recipes-results-section">
+    {% if meals is not none %}
+    <div class="results-info">
+        <h2>Search Results {% if request.form.get('keyword') %}for "<strong>{{ request.form.get('keyword')
+                }}</strong>"{% endif %}</h2>
+        <span class="results-count">Found {{ meals|length }} recipes</span>
+    </div>
+
+    {% if meals %}
+    <div class="recipes-grid-layout">
+        {% for meal in meals %}
+        <div class="recipe-card-detailed">
+            <div class="card-img-wrapper">
+                <img src="{{ meal.strMealThumb }}" alt="{{ meal.strMeal }}">
+                <span class="area-badge">{{ meal.strArea if meal.strArea else 'International' }}</span>
+            </div>
+            <div class="card-body">
+                <div class="safety-tags">
+                    <span class="badge-tag safe">100% Verified</span>
+                    <span class="badge-tag category">{{ meal.strCategory }}</span>
+                </div>
+                <h3 class="recipe-name">{{ meal.strMeal }}</h3>
+                <div class="recipe-meta">
+                    <span> ⏲️{{ meal.cook_label }}</span>
+                    <span> . </span>
+                    <span> 🥗{{ meal.prep_label }}</span>
+                </div>
+                <a href="/recipe/{{ meal.idMeal }}" class="btn-view-recipe">View Recipe & Allergen Details &rarr;</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-results">
+        <div class="no-results-icon"> 🥣 </div>
+        <h3>No matching recipes found</h3>
+        <p>Try searching with different keywords or deselect some filters.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+    <!-- Browse Country Flags Section -->
+    <div class="country-flags-container" style="text-align: center; margin: 30px 0;">
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">🌐 Browse by Country</h3>
+        <div class="flags-grid"
+            style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 900px; margin: 0 auto;">
+            <a href="{{ url_for('recipes_by_flag', area='American') }}" title="American">🇺🇸</a>
+            <a href="{{ url_for('recipes_by_flag', area='British') }}" title="British">🇬🇧</a>
+            <a href="{{ url_for('recipes_by_flag', area='Canadian') }}" title="Canadian">🇨🇦</a>
+            <a href="{{ url_for('recipes_by_flag', area='Chinese') }}" title="Chinese">🇨🇳</a>
+            <a href="{{ url_for('recipes_by_flag', area='French') }}" title="French">🇫🇷</a>
+            <a href="{{ url_for('recipes_by_flag', area='Indian') }}" title="Indian">🇮🇳</a>
+            <a href="{{ url_for('recipes_by_flag', area='Italian') }}" title="Italian">🇮🇹</a>
+            <a href="{{ url_for('recipes_by_flag', area='Japanese') }}" title="Japanese">🇯🇵</a>
+            <a href="{{ url_for('recipes_by_flag', area='Mexican') }}" title="Mexican">🇲🇽</a>
+            <a href="{{ url_for('recipes_by_flag', area='Thai') }}" title="Thai">🇹🇭</a>
+            <a href="{{ url_for('recipes_by_flag', area='Vietnamese') }}" title="Vietnamese">🇻🇳</a>
+            <a href="{{ url_for('recipes_by_flag', area='Vietnamese') }}"
+                style="font-weight: 600; font-size: 14px; text-decoration: none; color: var(--primary-orange); margin-left: 8px;">+
+                See All Countries</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

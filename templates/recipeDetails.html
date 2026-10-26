@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}{{ meal.strMeal }} - SafePlate Details{% endblock %}
+
+{% block content %}
+<div class="back-navigation recipe-back">
+    <button type="button" onclick="history.back()" class="btn-back">
+        ⬅ Go Back
+    </button>
+</div>
+
+<main class="recipes-results-section recipe-detail-container">
+    <!-- Header: Food Title and Verified Badge -->
+    <div class="recipe-detail-header">
+        <span class="sub-caption">{{ meal.strArea if meal.strArea else 'International' }} • {{ meal.strCategory
+            }}</span>
+        <h1 class="hero-title">{{ meal.strMeal }}</h1>
+        <div class="center-tags">
+            {% if cook_label %}
+            <span
+                class="badge {% if cook_label == 'Quick and Easy' %}badge-cook-quick{% elif cook_label == 'Standard Cooking' %}badge-cook-standard{% else %}badge-cook-longer{% endif %}">
+                ⏲️{{ cook_label }}</span>
+            {% endif %}
+            {% if prep_label %}
+            <span
+                class="badge {% if prep_label == 'Easy to prepare' %}badge-prep-easy{% elif prep_label == 'Standard to prepare' %}badge-prep-standard{% else %}badge-prep-hard{% endif %}">🔪
+                {{ prep_label }}</span>
+            {% endif %}
+            <span class="badge-tag safe">🥗 100% Safe & Verified</span>
+        </div>
+    </div>
+
+    <!-- Body: Image & Ingredients List -->
+    <div class="recipe-detail-body">
+        <div class="recipe-img-wrapper">
+            <img src="{{ meal.strMealThumb }}" alt="{{ meal.strMeal }}" class="recipe-detail-img">
+        </div>
+
+        <div class="recipe-ingredients-box">
+            <h3>🛒 Ingredients & Quantities</h3>
+            <ul class="ingredients-list">
+                {% for item in ingredients %}
+                <li class="ing-item">
+                    <img src="https://www.themealdb.com/images/ingredients/{{ item.name }}-Small.png"
+                        alt="{{ item.name }}" class="ing-icon">
+                    <span class="ing-name">{{ item.name }}</span>
+                    <span class="ing-measure">{{ item.measure }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer: Detailed cooking guide framework -->
+    <div class="recipe-instructions-box">
+        <h3>📖 Step-by-Step Instructions</h3>
+        <div class="instructions-steps">
+            {% for step in instructions %}
+            <div class="step-card">
+                <span class="step-number">STEP {{ loop.index }}</span>
+                <p class="step-text">{{ step }}</p>
+            </div>
+            {% else %}
+            <p>No instructions available for this recipe.</p>
+            {% endfor %}
+
+            <!-- Pro Tips Section -->
+            {% if pro_tips %}
+            <div class="step-card pro-tips-section"
+                style="border-left-color: #E56B42; background: #FFF5F2; padding: 20px 24px">
+                <span class="step-number" style="color: #E56B42; display: block; margin-bottom: 10px;">PRO TIPS</span>
+                <ul style="margin-top: 20px; line-height: 1.6; padding-left: 20px;">
+                    {% for tip in pro_tips %}
+                    <li style="margin-bottom: 6px;">{{ tip }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}
