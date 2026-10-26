@@ -50,10 +50,10 @@
 
                     <div class="dropdown-divider"></div>
 
-                    <!-- Group 3: All of brands  -->
+                    <!-- Group 3: All of   -->
                     <div class="dropdown-header"> EXPLORE ALL</div>
                     <a href="{{ url_for('search_recipes') }}">📖 All Verified Recipes</a>
-                    <a href="/#grocery-section">📦 Safe Supermarket Brands</a>
+                    <a href="{{ url_for('diet_guide') }}"> 🗒️ Diet Guide</a>
                 </div>
             </div>
             <a href="/#restaurants">Restaurant Finder</a>
@@ -61,15 +61,11 @@
             <a href="/#faq">FAQ</a>
         </nav>
         <div class="auth-buttons">
-            {% if current_user.is_authenticated %}
-            <span>Hello, {{ current_user.email }}</span>
-
-            <a href="{{ url_for('profile') }}" class="btn-primary-small">My Profile</a>
-            <a href="/logout" class="btn-primary-small">Logout</a>
+           {% if current_user.is_authenticated %}
+                <span>Hello, {{ current_user.email }}</span>
+                <a href="{{ url_for('profile') }}" class="btn-primary-small">My Profile</a>
+                <a href="/logout" class="btn-primary-small">Logout</a>
             {% else %}
-            <a href="/login" class="btn-primary-small">Sign In</a>
-            <a href="/register" class="btn-primary-small">Create Profile</a>
-            {% endif %}
         </div>
     </header>
 
@@ -77,6 +73,84 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <!-- CTA Banner Section -->
+    <section class="cta-banner">
+        <div class="cta-content">
+            <h2 class="cta-title">Begin your transition with ease.</h2>
+            <p class="cta-subtitle">Build your custom safe dietary profile today and unlock hundreds of dietitian-vetted
+                recipes, grocery lists, and safe local tables.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('profile') }}" class="btn-primary">Build Free Profile &rarr;</a>
+                <a href="#" class="btn-outline">Speak to a Wellness Specialist</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-icon">O</span>
+                    <span class="logo-text">SafePlate</span>
+                </div>
+                <p class="footer-desc">
+                    SafePlate provides supportive planning utilities to help individuals adapt to new dietary patterns
+                    safely. We advocate for structured healthcare consults alongside app-based dietary mapping.
+                </p>
+            </div>
+
+            <div class="footer-links-group">
+                <div class="footer-col">
+                    <h4 class="footer-col-title">PRODUCT</h4>
+                    <ul>
+                        <li><a href="{{ url_for('profile') }}">Profile Builder</a></li>
+                        <li><a href="{{ url_for('search_recipes') }}">Recipe Engine</a></li>
+                        <li><a href="/#grocery-section">Grocery Scanner</a></li>
+                        <li><a href="/#restaurants">Map Finder</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-col-title">SAFETY STANDARD</h4>
+                    <ul>
+                        <li><a href="/#safety">Our Science Panel</a></li>
+                        <li><a href="/#safety">Verification Steps</a></li>
+                        <li><a href="/#restaurants">Partner Cafes</a></li>
+                        <li><a href="#">Submit Protocol</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-col-title">RESOURCES</h4>
+                    <ul>
+                        <li><a href="#">Diet Guides</a></li>
+                        <li><a href="/#faq">FAQ</a></li>
+                        <li><a href="#">Community Stories</a></li>
+                        <li><a href="#">Clinical Disclaimers</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="disclaimer">
+                <strong>Medical Disclaimer:</strong> SafePlate is an information-aggregator tool and is not a substitute
+                for clinical diagnosis, dietary medical advice, or customized clinical plans. Always verify allergen
+                cross-contact risks with raw ingredient manufacturers and discuss any permanent nutritional shifts with
+                your physician or registered dietitian.
+            </p>
+            <div class="footer-meta">
+                <span>© 2026 SafePlate Inc. All rights reserved. Vetted and designed for happy, healthy plates.</span>
+                <div class="social-links">
+                    <a href="#">📷</a>
+                    <a href="#">📘</a>
+                    <a href="#">🐤</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Back to Top Button -->
     <button id="backToTopBtn" title="Go to top">↑</button>
