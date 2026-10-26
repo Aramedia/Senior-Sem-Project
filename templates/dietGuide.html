@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Dietary & Ingredient Guide - SafePlate{% endblock %}
+
+{% block content %}
+<section class="recipes-search-hero">
+    <div class="back-navigation">
+        <button type="button" onclick="history.back()" class="btn-back">
+            ⬅ Go Back
+        </button>
+    </div>
+    <div class="search-header">
+        <span class="sub-caption">SAFETY-FIRST KNOWLEDGE BASE</span>
+        <h1 class="section-title">Dietary & Ingredient Guide</h1>
+        <p class="section-subtitle">Understand what each diet entails, who it's for, and explore verified safe
+            ingredients.</p>
+    </div>
+</section>
+
+<section class="recipes-results-section" style="padding: 20px 0;">
+    <!-- List of all diet meals -->
+    <div class="diet-guides-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 50px;">
+        {% for diet_key, info in diet_info.items() %}
+        <div class="diet-card"
+            style="background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #eee; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #2d3748; margin: 0;">{{ info.title }}</h2>
+                    <span style="font-size: 1.5rem;">{{ info.icon }}</span>
+                </div>
+
+                <p style="font-size: 0.95rem; color: #4a5568; margin-bottom: 16px; line-height: 1.5;">
+                    <strong> WHO: </strong> {{ info.for_who }}
+                </p>
+
+                <!-- Safe Foods -->
+                <div style="margin-bottom: 12px;">
+                    <span style="font-weight: 600; font-size: 0.9rem; color: #2e7d32;"> ✅ Safe Foods &
+                        Ingredients:</span>
+                    <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 0.88rem; color: #555;">
+                        {% for food in info.safe_foods %}
+                        <li>{{ food }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Avoid / Allergen Foods -->
+                <div style="margin-bottom: 16px;">
+                    <span style="font-weight: 600; font-size: 0.9rem; color: #c62828;"> ❌ Foods & Ingredients to Avoid:</span>
+                    <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 0.88rem; color: #555;">
+                        {% for food in info.avoid_foods %}
+                        <li>{{ food }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Section of all ingredient from CSDL -->
+                {% if diet_ingredients and diet_ingredients.get(diet_key) %}
+                <div style="margin-top: 15px; font-size: 0.88rem;">
+                    <a href="{{ url_for('diet_ingredients_detail', diet_name=diet_key) }}"
+                        style="color: #3182ce; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                        <span>🔍 View full list of ingredients</span>
+                        <span style="font-size: 0.8rem; color: #718096;">({{ diet_ingredients[diet_key]|length if
+                            diet_ingredients.get(diet_key) else 0 }})</span> &rArr;
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Button for go to the diet recipes -->
+            <div style="margin-top: 20px;">
+                <a href="{{ url_for('search_recipes', diet=diet_key) }}" class="btn-primary"
+                    style="display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">
+                    Explore {{ diet_key }} Recipes &rArr;
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

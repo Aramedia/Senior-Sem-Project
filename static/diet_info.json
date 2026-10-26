@@ -1,0 +1,155 @@
+{
+    "Gluten-Free": {
+        "title": "Gluten-Free Diet",
+        "icon": "🍚",
+        "for_who": "People with Celiac disease, wheat allergy, or gluten sensitivity.",
+        "safe_foods": [
+            "Rice, Corn, Potatoes",
+            "Fresh Meat & Fish",
+            "Fresh Vegetables & Fruits",
+            "Gluten-free oats"
+        ],
+        "avoid_foods": [
+            "Wheat, Barley, Rye",
+            "Regular Pasta & Noodles",
+            "Traditional Soy Sauce",
+            "Bread & Pastries"
+        ]
+    },
+    "Dairy-Free": {
+        "title": "Dairy-Free Diet",
+        "icon": "🥛",
+        "for_who": "Individuals with Lactose Intolerance or Milk Allergy.",
+        "safe_foods": [
+            "Plant-based Milk (Almond, Soy, Oat)",
+            "Fresh Meat, Poultry & Eggs",
+            "Coconut Oil & Olive Oil",
+            "Tofu & Beans"
+        ],
+        "avoid_foods": [
+            "Cow & Goat Milk",
+            "Butter & Ghee",
+            "Cheese & Cream",
+            "Yogurt & Whey Protein"
+        ]
+    },
+    "Vegan": {
+        "title": "Vegan Diet",
+        "icon": "🥬",
+        "for_who": "People abstaining from all animal-derived products for health, ethical, or environmental reasons.",
+        "safe_foods": [
+            "Vegetables & Fruits",
+            "Grains & Legumes",
+            "Tofu & Tempeh",
+            "Nuts & Seeds"
+        ],
+        "avoid_foods": [
+            "Meat, Poultry & Seafood",
+            "Dairy & Eggs",
+            "Honey",
+            "Gelatin & Animal Fats"
+        ]
+    },
+    "Vegetarian": {
+        "title": "Vegetarian Diet",
+        "icon": "🥗",
+        "for_who": "People avoiding meat, poultry, and seafood.",
+        "safe_foods": [
+            "Vegetables & Fruits",
+            "Dairy Products & Eggs (Lacto-Ovo)",
+            "Beans, Tofu & Grains",
+            "Nuts & Seeds"
+        ],
+        "avoid_foods": [
+            "Beef, Pork, Lamb",
+            "Chicken, Duck, Turkey",
+            "Fish, Shellfish & Seafood",
+            "Animal Lard / Broth"
+        ]
+    },
+    "Nut-Free": {
+        "title": "Nut-Free Diet",
+        "icon": "🌰",
+        "for_who": "Individuals with severe Tree Nut or Peanut allergies.",
+        "safe_foods": [
+            "Sunflower & Pumpkin Seeds",
+            "Dairy & Meat",
+            "Grains & Legumes",
+            "Fruits & Vegetables"
+        ],
+        "avoid_foods": [
+            "Peanuts & Almonds",
+            "Cashews, Walnuts, Pistachios",
+            "Pesto Sauce (Pine Nuts)",
+            "Nut Oils & Nut Butter"
+        ]
+    },
+    "Soy-Free": {
+        "title": "Soy-Free Diet",
+        "icon": "🫘",
+        "for_who": "People with Soy allergy or Thyroid sensitivities.",
+        "safe_foods": [
+            "Meat, Fish & Eggs",
+            "Dairy or Almond/Coconut Milk",
+            "Olive & Coconut Oil",
+            "Rice & Wheat"
+        ],
+        "avoid_foods": [
+            "Soybeans, Edamame",
+            "Tofu, Tempeh & Miso",
+            "Soy Sauce & Tamari",
+            "Soybean Oil & Soy Lecithin"
+        ]
+    },
+    "Halal": {
+        "title": "Halal Diet",
+        "icon": "🧆",
+        "for_who": "Adherents of Islamic dietary laws.",
+        "safe_foods": [
+            "Halal-certified Meat & Poultry",
+            "Fish & Seafood",
+            "Vegetables, Fruits & Grains",
+            "Eggs & Dairy"
+        ],
+        "avoid_foods": [
+            "Pork, Bacon & Ham",
+            "Alcohol, Wine & Cooking Spirits",
+            "Non-Halal Slaughtered Meats",
+            "Lard & Gelatin"
+        ]
+    },
+    "Kosher": {
+        "title": "Kosher Diet",
+        "icon": "🥯",
+        "for_who": "Adherents of Jewish dietary laws.",
+        "safe_foods": [
+            "Kosher-certified Meats",
+            "Fish with scales and fins (Salmon, Tuna)",
+            "Fruits & Vegetables",
+            "Grains"
+        ],
+        "avoid_foods": [
+            "Pork, Bacon & Ham",
+            "Shellfish (Shrimp, Crab, Lobster)",
+            "Mixing Meat and Milk in one meal",
+            "Non-Kosher Gelatin"
+        ]
+    },
+    "Low-Sodium": {
+        "title": "Low-Sodium Diet",
+        "icon": "🧂",
+        "for_who": "People managing High Blood Pressure, Heart Health, or Kidney Conditions.",
+        "safe_foods": [
+            "Fresh Herbs & Spices",
+            "Unprocessed Meat & Fish",
+            "Fresh Fruits & Vegetables",
+            "Whole Grains"
+        ],
+        "avoid_foods": [
+            "Table Salt & Bouillon Cubes",
+            "Soy Sauce & Fish Sauce",
+            "Canned Soups & Cured Meats (Bacon)",
+            "Pickles & Processed Cheese"
+        ]
+    }
+}
